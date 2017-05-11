@@ -81,9 +81,8 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Bump()
     {
-        Animator_Body.Play("bump");
         // This animation may already be playing so set the play time back to zero
-        Animator_Body.SetTime(0);
+        Animator_Body.Play("bump", -1, 0f);
         // Invoke self at a random interval. This function will continue to be called until CancelInvoke() is called.
         Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
     }
