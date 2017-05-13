@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 /// <summary>
 /// Character controller script for the robot
 /// </summary>
 public class RobotController : MonoBehaviour
 {
-    // The UI Text object with the Game Over text
-    public GameObject GameOverTextObject;
-
     // Player characteristics
     public float MoveForce = 16f;
     public float JumpForce = 800f;
@@ -30,13 +22,6 @@ public class RobotController : MonoBehaviour
     public Animator Animator_Treads;
     public Animator Animator_Body;
 
-    // Animation clips
-    public AnimationClip Anim_Treads_Idle;
-    public AnimationClip Anim_Treads_MoveRight;
-    public AnimationClip Anim_Body_Raise;
-    public AnimationClip Anim_Body_Bump;
-    //TODO: Implement public AnimationClip Anim_Treads_MoveRightSlope;
-
     // Sound effects
     public AudioClip Audio_Move;
     public AudioClip Audio_Jump;
@@ -47,6 +32,7 @@ public class RobotController : MonoBehaviour
     // References to components
     private Rigidbody2D m_rigidBody;
     private AudioSource m_audio;
+    private GameManager m_gameManager;
 
     // Misc
     private bool m_isGrounded = true;
@@ -56,6 +42,8 @@ public class RobotController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        // Set the game manager reference
+        m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         // Set the rigidbody reference
         m_rigidBody = GetComponent<Rigidbody2D>();
         // Set the audio source reference
@@ -80,19 +68,9 @@ public class RobotController : MonoBehaviour
     {
         if (transform.position.y < Camera.main.GetComponent<FollowTarget>().MinYPosition)
         {
-            GameOverTextObject.GetComponent<Text>().enabled = true;
             m_isDead = true;
             m_audio.Stop();
-            Invoke("Restart", 2.0f);
         }
-    }
-
-    /// <summary>
-    /// Reloads the current scene
-    /// </summary>
-    private void Restart()
-    {
-        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
     }
 
     /// <summary>
@@ -128,7 +106,7 @@ public class RobotController : MonoBehaviour
             {
                 m_isMoving = true;
                 Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
-                Animator_Treads.Play(Anim_Treads_MoveRight.name);
+                Animator_Treads.Play(Globals.ANIMSTATE_MOVE_RIGHT);
                 m_audio.clip = Audio_Move;
                 m_audio.Play();
             }
@@ -144,7 +122,7 @@ public class RobotController : MonoBehaviour
             {
                 m_isMoving = true;
                 Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
-                Animator_Treads.Play(Anim_Treads_MoveRight.name);
+                Animator_Treads.Play(Globals.ANIMSTATE_MOVE_RIGHT);
                 m_audio.clip = Audio_Move;
                 m_audio.Play();
             }
@@ -157,7 +135,7 @@ public class RobotController : MonoBehaviour
         else if (m_rigidBody.velocity == Vector2.zero)
         {
             m_isMoving = false;
-            Animator_Treads.Play(Anim_Treads_Idle.name);
+            Animator_Treads.Play(Globals.ANIMSTATE_IDLE);
             CancelInvoke("Bump");
             if (!Input.GetKeyDown(KeyCode.W) && !Input.GetKeyDown(KeyCode.S))
             {
@@ -176,7 +154,7 @@ public class RobotController : MonoBehaviour
         if (m_isMoving)
         {
             // Set the tread animation speed to player speed
-            Animator_Treads.SetFloat("TreadSpeed", (m_rigidBody.velocity.x < 0 ? m_rigidBody.velocity.x * -1 : m_rigidBody.velocity.x) * TreadAnimSpeedMultiplier);
+            Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, (m_rigidBody.velocity.x < 0 ? m_rigidBody.velocity.x * -1 : m_rigidBody.velocity.x) * TreadAnimSpeedMultiplier);
             m_audio.pitch = (m_rigidBody.velocity.x < 0 ? m_rigidBody.velocity.x * -1 : m_rigidBody.velocity.x) * TreadAudioPitchMultiplier;
         }
         else
@@ -196,21 +174,21 @@ public class RobotController : MonoBehaviour
             if (Input.GetKey(KeyCode.W))
             {
                     // Set the AnimSpeed parameter in the Animator
-                    Animator_Body.SetFloat("AnimSpeed", 1);
+                    Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, 1);
                     // Raise the telescope
-                    Animator_Body.Play(Anim_Body_Raise.name);
+                    Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
             }
             else if (Input.GetKey(KeyCode.S))
             {
                 // Set the AnimSpeed parameter in the Animator to -1 to reverse the animation
-                Animator_Body.SetFloat("AnimSpeed", -1);
+                Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, -1);
                 // Lower the telescope
-                Animator_Body.Play(Anim_Body_Raise.name);
+                Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
             }
             else if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S))
             {
                 // Set the AnimSpeed parameter in the Animator to zero so it stops on the current frame
-                Animator_Body.SetFloat("AnimSpeed", 0);
+                Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
             }
         }
     }
