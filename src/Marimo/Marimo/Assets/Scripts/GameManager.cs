@@ -44,4 +44,12 @@ public class GameManager : MonoBehaviour {
     {
         LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    /// <summary>
+    /// Pauses or unpauses the game
+    /// </summary>
+    public void Pause()
+    {
+        Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+    }
 }
