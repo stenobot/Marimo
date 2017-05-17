@@ -151,18 +151,18 @@ public class RobotController : MonoBehaviour
     }
 
     /// <summary>
-    /// Makes the robot jump if it is grounded
+    /// Makes the robot jump if it is grounded and neck is not extended
     /// </summary>
     private void Jump()
     {
-        if (m_isGrounded)
+        if (m_isGrounded && !m_isNeckExtended)
         {
             // Add jump force to the player
-            m_rigidBody.AddForce(Vector2.up * JumpForce);
+            m_rigidBody.AddForce (Vector2.up * JumpForce);
             // Play the jump sound effect on the camera's audio source as its pitch won't be adjusted like this object's audio source
-            Camera.main.GetComponent<AudioSource>().PlayOneShot(Audio_Jump);
-			// Run Jump animation
-			Animator_Body.Play(Globals.ANIMSTATE_ROBOT_JUMP, 0, 0);
+            Camera.main.GetComponent<AudioSource> ().PlayOneShot (Audio_Jump);
+            // Run Jump animation
+            Animator_Body.Play (Globals.ANIMSTATE_ROBOT_JUMP, 0, 0);
         }
     }
 
