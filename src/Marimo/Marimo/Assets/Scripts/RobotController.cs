@@ -48,6 +48,11 @@ public class RobotController : MonoBehaviour
     private bool m_isDead = false;
     private bool m_isOnDownwardSlope = false;
     private bool m_isOnUpwardSlope = false;
+    private bool m_isNeckExtended = false;
+    private bool m_canMoveVertical = false;
+    private bool m_canMoveHorizontal = false;
+    private bool m_hasMovedForFrame = false;
+
 
     // Use this for initialization
     void Start()
@@ -65,6 +70,7 @@ public class RobotController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        m_hasMovedForFrame = false;
         if (!m_isDead)
         {
             // Process input
@@ -101,27 +107,23 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void HandleInput()
     {
-        // Capture the X and Y axis input values
-        float xAxis = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
-        float yAxis = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
-
-        // Set the movement properties
-        bool moveLeft = xAxis < 0 ? true : false;
-        bool moveRight = xAxis > 0 ? true : false;
-        bool jump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
+        // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
+        float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
+        float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
+        // Check if the Jump button is pressed
+        bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
         // Test if the player is grounded or on a slope
         CheckIfGrounded();
-
-        // Handle vertical input
-        MoveVertical(yAxis);
-
-        // Handle horizontal input
-        if (moveLeft || moveRight)
-            MoveHorizontal(xAxis);
+        // Compare the X and Y axis input and determine which should take preference
+        SetMovementAxes(xAxisInput, yAxisInput);
+        // Move the player vertically (if permitted)
+        MoveVertical(yAxisInput);
+        // Move the player horizontally (if permitted)
+        MoveHorizontal(xAxisInput);
 
         // Only allow jumping while grounded
-        if (jump)
+        if (tryJump)
             Jump();
         else
             SetIdle();
@@ -130,6 +132,27 @@ public class RobotController : MonoBehaviour
         SetAnimationStates();
     }
 
+    /// <summary>
+    /// Compares the X and Y axis input and sets the allowable movement direction
+    /// </summary>
+    /// <param name="xAxis">The X axis input value</param>
+    /// <param name="yAxis">The Y axis input value</param>
+    private void SetMovementAxes(float xAxisInput, float yAxisInput)
+    {
+        // Clamp the inputs to the valid input range (-1 to 1)
+        xAxisInput = Mathf.Clamp(xAxisInput, -1, 1);
+        yAxisInput = Mathf.Clamp(yAxisInput, -1, 1);
+        // Get absolute values for comparison
+        float xAxisAbs = Mathf.Abs(xAxisInput);
+        float yAxisAbs = Mathf.Abs(yAxisInput);
+        // Compare the absolute values of the input axes. If they are equal, the horizontal axis will take priority
+        m_canMoveHorizontal = xAxisInput == 0 ? false : xAxisAbs >= yAxisAbs;
+        m_canMoveVertical = yAxisInput == 0 ? false : yAxisAbs > xAxisAbs;
+    }
+
+    /// <summary>
+    /// Makes the robot jump if it is grounded
+    /// </summary>
     private void Jump()
     {
         if (m_isGrounded)
@@ -139,7 +162,7 @@ public class RobotController : MonoBehaviour
             // Play the jump sound effect on the camera's audio source as its pitch won't be adjusted like this object's audio source
             Camera.main.GetComponent<AudioSource>().PlayOneShot(Audio_Jump);
 			// Run Jump animation
-			Animator_Body.Play(Globals.ANIMSTATE_ROBOT_JUMP);
+			Animator_Body.Play(Globals.ANIMSTATE_ROBOT_JUMP, 0, 0);
         }
     }
 
@@ -151,16 +174,18 @@ public class RobotController : MonoBehaviour
         // If the player is moving, set correct animation states, speeds, and audio pitch
         if (m_isMoving)
         {
+            // Get the absolute value for the player's horizontal speed
+            float xSpeed = Mathf.Abs(m_rigidBody.velocity.x);
             // Get the correct animation state
             string animState = GetMovementAnimState();
             // Play treads animation
             Animator_Treads.Play(animState);
             // Clamp the X velocity to the maximum speed
             m_rigidBody.velocity = MathHelper.Clamp(m_rigidBody.velocity, new Vector2(-MaxSpeed, Mathf.NegativeInfinity), new Vector2(MaxSpeed, Mathf.Infinity));
-            // Set the tread animation speed to player speed
-            Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, (m_rigidBody.velocity.x < 0 ? m_rigidBody.velocity.x * -1 : m_rigidBody.velocity.x) * TreadAnimSpeedMultiplier);
+            // Set the tread animation speed based on the horizontal speed
+            Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, xSpeed * TreadAnimSpeedMultiplier);
             // Set the audio pitch based on the horizontal speed
-            m_audio.pitch = (m_rigidBody.velocity.x < 0 ? m_rigidBody.velocity.x * -1 : m_rigidBody.velocity.x) * TreadAudioPitchMultiplier;
+            m_audio.pitch = xSpeed * TreadAudioPitchMultiplier;
         }
     }
 
@@ -186,23 +211,30 @@ public class RobotController : MonoBehaviour
     /// <summary>
     /// Moves the player vertically (raises the robot's neck)
     /// </summary>
-    /// <param name="moveUp">Indicated that the player is moving up. If false it is implied that the player is moving down</param>
-    private void MoveVertical(float moveSpeed)
+    /// <param name="yAxisInput">The controller input value of the Y axis</param>
+    private void MoveVertical(float yAxisInput)
     {
         // Handle idle state and vertical movement
-        if (m_isGrounded && m_rigidBody.velocity.x == 0)
+        if (m_isGrounded && m_rigidBody.velocity.x == 0 && !m_isMoving)
         {
+            // Retrieve the current animation state
+            AnimatorStateInfo animStateInfo = Animator_Body.GetCurrentAnimatorStateInfo(0);
             // Get the current time for the animation, where 1 is 100% complete and 0 is 0% complete
-            float currentAnimTime = Animator_Body.GetCurrentAnimatorStateInfo(0).normalizedTime;
+            // If the "raise" animation state is not playing the time should always be zero
+            float currentAnimTime = animStateInfo.IsName(Globals.ANIMSTATE_ROBOT_RAISE) ? animStateInfo.normalizedTime : 0;
             // Check if the animation has completed in the given playback direction
-            bool canAnimate = moveSpeed > 0 ? currentAnimTime < 1 : currentAnimTime > 0;
+            bool canAnimate = yAxisInput > 0 ? currentAnimTime < 1 : currentAnimTime > 0;
+            // Indicate that the neck is extended to other functions
+            m_isNeckExtended = currentAnimTime > 0;
 
-            if (canAnimate)
+            if (canAnimate && m_canMoveVertical)
             {
                 // Set the AnimSpeed parameter in the Animator
-                Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, moveSpeed);
+                Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
                 // Raise or lower the telescope
                 Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
+                // The player has completed their movement action for this frame
+                m_hasMovedForFrame = true;
             }
             else
             {
@@ -215,27 +247,39 @@ public class RobotController : MonoBehaviour
     /// <summary>
     /// Moves the player horizontally
     /// </summary>
-    /// <param name="moveLeft">Indicates that the player is moving left. If false it is implied that the player is moving right</param>
-    private void MoveHorizontal(float moveSpeed)
+    /// <param name="xAxisInput">The controller input value of the X axis</param>
+    private void MoveHorizontal(float xAxisInput)
     {
-        // If the player was not previously moving, start moving
-        if (!m_isMoving)
+        if (m_canMoveHorizontal && !m_isNeckExtended)
         {
-            m_isMoving = true;
-            // Play the move audio
-            m_audio.clip = Audio_Move;
-            m_audio.Play();
-            // Start bump animation
-            Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
+            // If the player was not previously moving, start moving
+            if (!m_isMoving)
+            {
+                m_isMoving = true;
+                // Play the move audio
+                m_audio.clip = Audio_Move;
+                m_audio.Play();
+                // Start bump animation
+                Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
+            }
+
+            // Set scale to flip the player if moving left
+            int scale = xAxisInput < 0 ? -1 : 1;
+            Animator_Treads.transform.localScale = new Vector2(scale, 1);
+            Animator_Body.transform.localScale = new Vector2(scale, 1);
+
+            // Add force to the player
+            m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput);
+            // The player has completed their movement action for this frame
+            m_hasMovedForFrame = true;
         }
-
-        // Set scale to flip the player if moving left
-        int scale = moveSpeed < 0 ? -1 : 1;
-        Animator_Treads.transform.localScale = new Vector2(scale, 1);
-        Animator_Body.transform.localScale = new Vector2(scale, 1);
-
-        // Add force to the player
-        m_rigidBody.AddForce(Vector2.right * MoveForce * moveSpeed);
+        else if (m_isNeckExtended && !m_hasMovedForFrame && xAxisInput!=0)
+        {
+            // Retract the robot's neck
+            m_canMoveVertical = true;
+            MoveVertical(-1);
+            return;
+        }
     }
 
     /// <summary>
