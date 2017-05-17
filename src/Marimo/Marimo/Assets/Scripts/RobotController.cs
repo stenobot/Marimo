@@ -14,8 +14,8 @@ public class RobotController : MonoBehaviour
     public float MaxSpeed = 14f;
     // If the player makes impact at a greater velocity than the maximum it will be destroyed
     public float MaximumImpactVelocity = 30f;
-    // The prefab to instantiate when the player is smashed
-    public GameObject SmashPrefab;
+    // The smash effect gameobject to enable when the player is smashed
+    public GameObject SmashEffectObj;
 
     // This is multiplied by the velocity to determine the speed of the treads animation
     public float TreadAnimSpeedMultiplier = 1f;
@@ -380,10 +380,10 @@ public class RobotController : MonoBehaviour
             // Disable sprite renderers in all children
             foreach (SpriteRenderer r in GetComponentsInChildren<SpriteRenderer>())
                 r.enabled = false;
-            // Instantiate the "smash" effect prefab
-            GameObject effect = Instantiate(SmashPrefab, transform.position, Quaternion.identity);
+            // Enable the "smash" effect object
+            SmashEffectObj.SetActive(true);
             // Add force and randomized torque to each rigidbody child of the effect object
-            foreach (Rigidbody2D rig in effect.GetComponentsInChildren<Rigidbody2D>())
+            foreach (Rigidbody2D rig in SmashEffectObj.GetComponentsInChildren<Rigidbody2D>())
             {
                 // Reverse the impact force and apply it to the rigidbody
                 rig.AddForce(col.relativeVelocity * -1, ForceMode2D.Impulse);
