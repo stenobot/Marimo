@@ -161,6 +161,8 @@ public class RobotController : MonoBehaviour
             m_rigidBody.AddForce(Vector2.up * JumpForce);
             // Play the jump sound effect on the camera's audio source as its pitch won't be adjusted like this object's audio source
             Camera.main.GetComponent<AudioSource>().PlayOneShot(Audio_Jump);
+			// Run Jump animation
+			Animator_Body.Play(Globals.ANIMSTATE_ROBOT_JUMP);
         }
     }
 
