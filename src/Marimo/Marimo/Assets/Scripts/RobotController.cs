@@ -51,6 +51,7 @@ public class RobotController : MonoBehaviour
     private bool m_isNeckExtended = false;
     private bool m_canMoveVertical = false;
     private bool m_canMoveHorizontal = false;
+    private bool m_hasMovedForFrame = false;
 
 
     // Use this for initialization
@@ -69,6 +70,7 @@ public class RobotController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        m_hasMovedForFrame = false;
         if (!m_isDead)
         {
             // Process input
@@ -114,7 +116,7 @@ public class RobotController : MonoBehaviour
         // Test if the player is grounded or on a slope
         CheckIfGrounded();
         // Compare the X and Y axis input and determine which should take preference
-        SetMovementAxis(xAxisInput, yAxisInput);
+        SetMovementAxes(xAxisInput, yAxisInput);
         // Move the player vertically (if permitted)
         MoveVertical(yAxisInput);
         // Move the player horizontally (if permitted)
@@ -135,7 +137,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     /// <param name="xAxis">The X axis input value</param>
     /// <param name="yAxis">The Y axis input value</param>
-    private void SetMovementAxis(float xAxisInput, float yAxisInput)
+    private void SetMovementAxes(float xAxisInput, float yAxisInput)
     {
         // Clamp the inputs to the valid input range (-1 to 1)
         xAxisInput = Mathf.Clamp(xAxisInput, -1, 1);
@@ -229,6 +231,8 @@ public class RobotController : MonoBehaviour
                 Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
                 // Raise or lower the telescope
                 Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
+                // The player has completed their movement action for this frame
+                m_hasMovedForFrame = true;
             }
             else
             {
@@ -244,7 +248,7 @@ public class RobotController : MonoBehaviour
     /// <param name="xAxisInput">The controller input value of the X axis</param>
     private void MoveHorizontal(float xAxisInput)
     {
-        if (m_canMoveHorizontal)
+        if (m_canMoveHorizontal && !m_isNeckExtended)
         {
             // If the player was not previously moving, start moving
             if (!m_isMoving)
@@ -257,7 +261,6 @@ public class RobotController : MonoBehaviour
                 Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
             }
 
-
             // Set scale to flip the player if moving left
             int scale = xAxisInput < 0 ? -1 : 1;
             Animator_Treads.transform.localScale = new Vector2(scale, 1);
@@ -265,8 +268,10 @@ public class RobotController : MonoBehaviour
 
             // Add force to the player
             m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput);
+            // The player has completed their movement action for this frame
+            m_hasMovedForFrame = true;
         }
-        else if (m_isNeckExtended)
+        else if (m_isNeckExtended && !m_hasMovedForFrame && xAxisInput!=0)
         {
             // Retract the robot's neck
             m_canMoveVertical = true;
