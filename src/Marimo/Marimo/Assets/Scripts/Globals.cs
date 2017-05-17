@@ -13,6 +13,7 @@ public class Globals
     public const string ANIMSTATE_MOVE_RIGHT_DOWN = "moverightdown";
     public const string ANIMSTATE_ROBOT_RAISE = "raise";
     public const string ANIMSTATE_ROBOT_BUMP = "bump";
+    public const string ANIMSTATE_ROBOT_JUMP = "jump";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
