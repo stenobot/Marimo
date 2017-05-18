@@ -1,7 +1,24 @@
-# Marimo
+# Marimot
 A game project called Marimo.
 
 ## Unity Guidelines
+### Quick Start
+1. We're using Unity 5.6.x, which you can download here:
+[https://store.unity.com/download?ref=update](https://store.unity.com/download?ref=update)
+You can probably leave the default selection options when installing. This game will be PC only (at first), and we're not using any built-in textures/sprites or anything like that.
+2. Install Tiled from here (most recent version should be fine... we're currently on 0.18.2):
+[https://thorbjorn.itch.io/tiled](https://thorbjorn.itch.io/tiled)
+3. And Tiled2Unity, which we'll use to import Tiled files to Unity.
+[http://www.seanba.com/tiled2unity](http://www.seanba.com/tiled2unity)
+
+When opening the project in Unity, here are a few tips:
+1. Start Unity, click Open, then browse to the Marimo folder to open the project. Unity doesn't have a specific project file.
+2. To actually see things working, you'll need to open a "Scene". In the Project pane, look for Assets > Scenes, and double click the scene "Prototype".
+3. Click the Play button at the top to run the Prototype scene.
+4. To play with animations, in the Hierarchy pane, expand Robot and select Body. Open the Animation pane (not Animator pane) and choose an animation in the tiny drop down menu.
+5. Now select Robot in the Hierarchy pane, and check out the Inspector pane. Lots of custom variables associated with the RobotController script, RigidBody properties, etc. to play around with.
+5. All C# scripts are in Assets > Scripts, which you can find in the Project pane.
+
 ### Importing New Sprites
 1. Import the sprites by dragging them into Unity
 2. Select the sprites in Unity's **Project** pane
