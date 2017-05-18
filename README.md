@@ -1,4 +1,4 @@
-# Marimot
+# Marimo
 A game project called Marimo.
 
 ## Unity Guidelines
