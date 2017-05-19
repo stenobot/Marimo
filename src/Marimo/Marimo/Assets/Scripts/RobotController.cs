@@ -385,6 +385,8 @@ public class RobotController : MonoBehaviour
             // Add force and randomized torque to each rigidbody child of the effect object
             foreach (Rigidbody2D rig in SmashEffectObj.GetComponentsInChildren<Rigidbody2D>())
             {
+                // Reset the current speed so it doesn't dampen the force applied
+                rig.velocity = Vector2.zero;
                 // Reverse the impact force and apply it to the rigidbody
                 rig.AddForce(col.relativeVelocity * -1, ForceMode2D.Impulse);
                 // Add randomized torque to cause some rotation
