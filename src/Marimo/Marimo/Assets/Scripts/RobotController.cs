@@ -119,10 +119,10 @@ public class RobotController : MonoBehaviour
         CheckIfGrounded();
         // Compare the X and Y axis input and determine which should take preference
         SetMovementAxes(xAxisInput, yAxisInput);
-        // Move the player vertically (if permitted)
-        MoveVertical(yAxisInput);
-        // Move the player horizontally (if permitted)
-        MoveHorizontal(xAxisInput);
+            // Move the player vertically (if permitted)
+            MoveVertical(yAxisInput);
+            // Move the player horizontally (if permitted)
+            MoveHorizontal(xAxisInput);
 
         // Only allow jumping while grounded
         if (tryJump)
@@ -188,10 +188,6 @@ public class RobotController : MonoBehaviour
             Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, xSpeed * TreadAnimSpeedMultiplier);
             // Set the audio pitch based on the horizontal speed
             m_audio.pitch = xSpeed * TreadAudioPitchMultiplier;
-        }
-        else
-        {
-            SetIdle();
         }
     }
 
