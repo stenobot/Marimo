@@ -125,8 +125,6 @@ public class Elevator : MonoBehaviour
             (finalHeight == StopHeight && !m_startPositionIsBottom) ? true : false;
         IsAtTop = !IsAtBottom;
 
-
-
         if (finalHeight == (m_startPositionIsBottom ? StartHeight : StopHeight))
         {
             IsAtBottom = true;
