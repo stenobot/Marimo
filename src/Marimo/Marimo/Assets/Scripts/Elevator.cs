@@ -14,7 +14,9 @@ public class Elevator : MonoBehaviour
     public float Speed = 3f;
     // Tracks if the elevator is in transit
     public bool IsMoving { get; private set; }
+    // Tracks if elevator is at the top position
     public bool IsAtTop { get; private set; }
+    // Tracks if elevator is at the bottom position
     public bool IsAtBottom { get; private set; }
 
     // Holds reference to rigid body
@@ -41,6 +43,7 @@ public class Elevator : MonoBehaviour
         transform.localPosition = new Vector2(transform.localPosition.x, StartHeight);
         // Work out which position is on the bottom
         m_startPositionIsBottom = StartHeight > StopHeight ? false : true;
+        // Check if player is at top or bottom position
         if (m_startPositionIsBottom)
         {
             IsAtBottom = true;
@@ -51,6 +54,7 @@ public class Elevator : MonoBehaviour
             IsAtBottom = false;
             IsAtTop = true;
         }
+
         // Set the target height
         m_targetHeight = StopHeight;
     }
@@ -82,12 +86,14 @@ public class Elevator : MonoBehaviour
 
         if (!IsMoving)
         {
+            // Make the player a child of the elevator
             GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).transform.parent = transform;
+            // Make the player kinematic so physics doesn't affect it
+            m_playerRig.isKinematic = true;
             IsMoving = true;
             m_targetHeight = m_targetHeight == StartHeight ? StopHeight : StartHeight;
             m_moveDirection = direction;
             m_rig.velocity = direction * Speed;
-            m_playerRig.isKinematic = true;
             IsAtBottom = false;
             IsAtTop = false;
         }
@@ -124,17 +130,6 @@ public class Elevator : MonoBehaviour
         IsAtBottom = (finalHeight == StartHeight && m_startPositionIsBottom) ? true :
             (finalHeight == StopHeight && !m_startPositionIsBottom) ? true : false;
         IsAtTop = !IsAtBottom;
-
-        if (finalHeight == (m_startPositionIsBottom ? StartHeight : StopHeight))
-        {
-            IsAtBottom = true;
-            IsAtTop = false;
-        }
-        else
-        {
-            IsAtBottom = false;
-            IsAtTop = true;
-        }
 
         GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).transform.parent = null;
 
