@@ -172,7 +172,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void SetAnimationStates()
     {
-        if(m_elevator!=null && m_elevator.IsMoving)
+        if((m_elevator!=null && m_elevator.IsMoving) || m_rigidBody.velocity.x == 0)
         {
             SetIdle();
             return;
