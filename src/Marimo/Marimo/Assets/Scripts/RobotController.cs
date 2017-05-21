@@ -109,29 +109,28 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void HandleInput()
     {
-        // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
-        float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
-        float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
-        // Check if the Jump button is pressed
-        bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
+            // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
+            float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
+            float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
+            // Check if the Jump button is pressed
+            bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
-        // Test if the player is grounded, on a slope or an elevator
-        CheckIfGrounded();
-        // Compare the X and Y axis input and determine which should take preference
-        SetMovementAxes(xAxisInput, yAxisInput);
+            // Test if the player is grounded, on a slope or an elevator
+            CheckIfGrounded();
+            // Compare the X and Y axis input and determine which should take preference
+            SetMovementAxes(xAxisInput, yAxisInput);
             // Move the player vertically (if permitted)
             MoveVertical(yAxisInput);
+
             // Move the player horizontally (if permitted)
             MoveHorizontal(xAxisInput);
 
-        // Only allow jumping while grounded
-        if (tryJump)
-            Jump();
-        else
-            SetIdle();
+            // Only allow jumping while grounded
+            if (tryJump)
+                Jump();
 
-        // Set animation state, speed, and audio pitch
-        SetAnimationStates();
+            // Set animation state, speed, and audio pitch
+            SetAnimationStates();
     }
 
     /// <summary>
@@ -173,6 +172,11 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void SetAnimationStates()
     {
+        if(m_elevator!=null && m_elevator.IsMoving)
+        {
+            SetIdle();
+            return;
+        }
         // If the player is moving, set correct animation states, speeds, and audio pitch
         if (m_isMoving)
         {
@@ -196,18 +200,15 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void SetIdle()
     {
-        if ((m_isGrounded || m_elevator != null) && m_rigidBody.velocity.x == 0)
-        {
-            m_isMoving = false;
-            // Get the idle animation state for the treads
-            string animState = GetIdleAnimState();
-            // Play the tread animation
-            Animator_Treads.Play(animState);
-            // Stop the Bump animation
-            CancelInvoke("Bump");
-            // Stop the movement audio
-            m_audio.Stop();
-        }
+        m_isMoving = false;
+        // Get the idle animation state for the treads
+        string animState = GetIdleAnimState();
+        // Play the tread animation
+        Animator_Treads.Play(animState);
+        // Stop the Bump animation
+        CancelInvoke("Bump");
+        // Stop the movement audio
+        m_audio.Stop();
     }
 
     /// <summary>
