@@ -36,6 +36,8 @@ public class RobotController : MonoBehaviour
 
     // The ground physics layer(s), used to detect if player is grounded or in the air
     public LayerMask GroundLayerMask;
+    // The elevator physics layer(s) to detect if player is standing on an elevator
+    public LayerMask ElevatorLayerMask;
 
     // References to components
     private Rigidbody2D m_rigidBody;
@@ -52,7 +54,7 @@ public class RobotController : MonoBehaviour
     private bool m_canMoveVertical = false;
     private bool m_canMoveHorizontal = false;
     private bool m_hasMovedForFrame = false;
-
+    private Elevator m_elevator;
 
     // Use this for initialization
     void Start()
@@ -113,7 +115,7 @@ public class RobotController : MonoBehaviour
         // Check if the Jump button is pressed
         bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
-        // Test if the player is grounded or on a slope
+        // Test if the player is grounded, on a slope or an elevator
         CheckIfGrounded();
         // Compare the X and Y axis input and determine which should take preference
         SetMovementAxes(xAxisInput, yAxisInput);
@@ -155,14 +157,14 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if (m_isGrounded && !m_isNeckExtended)
+        if ((m_isGrounded || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
         {
             // Add jump force to the player
-            m_rigidBody.AddForce (Vector2.up * JumpForce);
+            m_rigidBody.AddForce(Vector2.up * JumpForce);
             // Play the jump sound effect on the camera's audio source as its pitch won't be adjusted like this object's audio source
-            Camera.main.GetComponent<AudioSource> ().PlayOneShot (Audio_Jump);
+            Camera.main.GetComponent<AudioSource>().PlayOneShot(Audio_Jump);
             // Run Jump animation
-            Animator_Body.Play (Globals.ANIMSTATE_ROBOT_JUMP, 0, 0);
+            Animator_Body.Play(Globals.ANIMSTATE_ROBOT_JUMP, 0, 0);
         }
     }
 
@@ -187,6 +189,10 @@ public class RobotController : MonoBehaviour
             // Set the audio pitch based on the horizontal speed
             m_audio.pitch = xSpeed * TreadAudioPitchMultiplier;
         }
+        else
+        {
+            SetIdle();
+        }
     }
 
     /// <summary>
@@ -194,7 +200,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void SetIdle()
     {
-        if (m_isGrounded && m_rigidBody.velocity.x == 0)
+        if ((m_isGrounded || m_elevator != null) && m_rigidBody.velocity.x == 0)
         {
             m_isMoving = false;
             // Get the idle animation state for the treads
@@ -214,6 +220,13 @@ public class RobotController : MonoBehaviour
     /// <param name="yAxisInput">The controller input value of the Y axis</param>
     private void MoveVertical(float yAxisInput)
     {
+        if (m_elevator != null && !m_elevator.IsMoving && !m_isGrounded && m_canMoveVertical && yAxisInput != 0)
+        {
+            Vector2 moveDir = yAxisInput > 0 ? Vector2.up : Vector2.down;
+            m_elevator.Move(moveDir);
+            return;
+        }
+
         // Handle idle state and vertical movement
         if (m_isGrounded && m_rigidBody.velocity.x == 0 && !m_isMoving)
         {
@@ -250,7 +263,7 @@ public class RobotController : MonoBehaviour
     /// <param name="xAxisInput">The controller input value of the X axis</param>
     private void MoveHorizontal(float xAxisInput)
     {
-        if (m_canMoveHorizontal && !m_isNeckExtended)
+        if (m_canMoveHorizontal && !m_isNeckExtended && (m_elevator == null || !m_elevator.IsMoving))
         {
             // If the player was not previously moving, start moving
             if (!m_isMoving)
@@ -273,12 +286,11 @@ public class RobotController : MonoBehaviour
             // The player has completed their movement action for this frame
             m_hasMovedForFrame = true;
         }
-        else if (m_isNeckExtended && !m_hasMovedForFrame && xAxisInput!=0)
+        else if (m_isNeckExtended && !m_hasMovedForFrame && xAxisInput != 0)
         {
             // Retract the robot's neck
             m_canMoveVertical = true;
             MoveVertical(-1);
-            return;
         }
     }
 
@@ -288,7 +300,9 @@ public class RobotController : MonoBehaviour
     private void CheckIfGrounded()
     {
         // Check if the player is touching the ground layer
-        m_isGrounded = Physics2D.OverlapCircle(transform.position, .4f, GroundLayerMask);
+        m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
+        Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
+        m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
 
         // Set raycast parameters for slope testing
         float rayLength = .4f;
