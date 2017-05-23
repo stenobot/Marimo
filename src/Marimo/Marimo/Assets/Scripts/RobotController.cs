@@ -55,6 +55,7 @@ public class RobotController : MonoBehaviour
     private bool m_canMoveHorizontal = false;
     private bool m_hasMovedForFrame = false;
     private Elevator m_elevator;
+	private Conveyor m_conveyor;
 
     // Use this for initialization
     void Start()
