@@ -270,7 +270,8 @@ public class RobotController : MonoBehaviour
                 m_audio.clip = Audio_Move;
                 m_audio.Play();
                 // Start bump animation
-                Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
+				if (m_isGrounded)
+                	Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
             }
 
             // Set scale to flip the player if moving left
