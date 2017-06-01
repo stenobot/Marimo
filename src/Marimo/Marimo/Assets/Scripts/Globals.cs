@@ -14,6 +14,8 @@ public class Globals
     public const string ANIMSTATE_ROBOT_RAISE = "raise";
     public const string ANIMSTATE_ROBOT_BUMP = "bump";
     public const string ANIMSTATE_ROBOT_JUMP = "jump";
+	public const string ANIMSTATE_CONVEYOR_RIGHT = "moveright";
+	public const string ANIMSTATE_CONVEYOR_LEFT = "moveleft";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";

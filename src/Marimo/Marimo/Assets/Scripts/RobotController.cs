@@ -38,6 +38,7 @@ public class RobotController : MonoBehaviour
     public LayerMask GroundLayerMask;
     // The elevator physics layer(s) to detect if player is standing on an elevator
     public LayerMask ElevatorLayerMask;
+	public LayerMask ConveyorLayerMask;
 
     // References to components
     private Rigidbody2D m_rigidBody;
@@ -56,6 +57,8 @@ public class RobotController : MonoBehaviour
     private bool m_hasMovedForFrame = false;
     private Elevator m_elevator;
 	private Conveyor m_conveyor;
+	private bool m_isOnConveyor = false;
+	private float m_conveyorForce = 12f;
 
     // Use this for initialization
     void Start()
@@ -110,28 +113,30 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void HandleInput()
     {
-            // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
-            float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
-            float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
-            // Check if the Jump button is pressed
-            bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
+        // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
+        float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
+        float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
+        // Check if the Jump button is pressed
+        bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
-            // Test if the player is grounded, on a slope or an elevator
-            CheckIfGrounded();
-            // Compare the X and Y axis input and determine which should take preference
-            SetMovementAxes(xAxisInput, yAxisInput);
-            // Move the player vertically (if permitted)
-            MoveVertical(yAxisInput);
+        // Test if the player is grounded, on a slope or an elevator
+        CheckIfGrounded();
+		// Test if robot is on a conveyor belt, which will affect movement differently
+        CheckIfOnConveyor();
+        // Compare the X and Y axis input and determine which should take preference
+        SetMovementAxes(xAxisInput, yAxisInput);
+        // Move the player vertically (if permitted)
+        MoveVertical(yAxisInput);
 
-            // Move the player horizontally (if permitted)
-            MoveHorizontal(xAxisInput);
+        // Move the player horizontally (if permitted)
+        MoveHorizontal(xAxisInput);
 
-            // Only allow jumping while grounded
-            if (tryJump)
-                Jump();
+        // Only allow jumping while grounded
+        if (tryJump)
+            Jump();
 
-            // Set animation state, speed, and audio pitch
-            SetAnimationStates();
+        // Set animation state, speed, and audio pitch
+        SetAnimationStates();
     }
 
     /// <summary>
@@ -157,7 +162,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if ((m_isGrounded || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
+		if ((m_isGrounded || m_isOnConveyor || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
         {
             // Add jump force to the player
             m_rigidBody.AddForce(Vector2.up * JumpForce);
@@ -173,7 +178,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void SetAnimationStates()
     {
-        if((m_elevator!=null && m_elevator.IsMoving) || m_rigidBody.velocity.x == 0)
+        if((m_elevator != null && m_elevator.IsMoving) || m_rigidBody.velocity.x == 0)
         {
             SetIdle();
             return;
@@ -187,9 +192,14 @@ public class RobotController : MonoBehaviour
             string animState = GetMovementAnimState();
             // Play treads animation
             Animator_Treads.Play(animState);
-            // Clamp the X velocity to the maximum speed
-            m_rigidBody.velocity = MathHelper.Clamp(m_rigidBody.velocity, new Vector2(-MaxSpeed, Mathf.NegativeInfinity), new Vector2(MaxSpeed, Mathf.Infinity));
-            // Set the tread animation speed based on the horizontal speed
+            // Clamp the X velocity to the maximum speed, adjusting for direction and speed of conveyors
+		    m_rigidBody.velocity = 
+				MathHelper.Clamp(
+					m_rigidBody.velocity, 
+					new Vector2(-(MaxSpeed + ((m_isOnConveyor && m_conveyor.IsReverse) ? m_conveyor.Speed : 0)), Mathf.NegativeInfinity), 
+					new Vector2(MaxSpeed + ((m_isOnConveyor && !m_conveyor.IsReverse) ? m_conveyor.Speed : 0), Mathf.Infinity)
+				);		
+			// Set the tread animation speed based on the horizontal speed
             Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, xSpeed * TreadAnimSpeedMultiplier);
             // Set the audio pitch based on the horizontal speed
             m_audio.pitch = xSpeed * TreadAudioPitchMultiplier;
@@ -302,6 +312,8 @@ public class RobotController : MonoBehaviour
         m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
         Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
         m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
+		Collider2D conveyorCol = Physics2D.OverlapCircle(transform.position, .05f, ConveyorLayerMask);
+		m_conveyor = (conveyorCol != null) ? conveyorCol.GetComponent<Conveyor>() : null;
 
         // Set raycast parameters for slope testing
         float rayLength = .4f;
@@ -343,6 +355,22 @@ public class RobotController : MonoBehaviour
             m_isOnDownwardSlope = false;
         }
     }
+
+	/// <summary>
+	/// Checks if on conveyor and moves player
+	/// </summary>
+    private void CheckIfOnConveyor()
+	{
+		if (m_conveyor != null) 
+		{
+			m_isOnConveyor = true;
+			m_conveyor.MovePlayer();
+		} 
+		else 
+		{
+			m_isOnConveyor = false;
+		}
+	}
 
     /// <summary>
     /// Gets the correct idle animation state for the robot treads based on the current slope
