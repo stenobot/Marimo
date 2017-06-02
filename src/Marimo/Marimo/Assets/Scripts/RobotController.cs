@@ -55,10 +55,8 @@ public class RobotController : MonoBehaviour
     private bool m_canMoveVertical = false;
     private bool m_canMoveHorizontal = false;
     private bool m_hasMovedForFrame = false;
-    private Elevator m_elevator;
+	private Elevator m_elevator;
 	private Conveyor m_conveyor;
-	private bool m_isOnConveyor = false;
-	private float m_conveyorForce = 12f;
 
     // Use this for initialization
     void Start()
@@ -162,7 +160,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-		if ((m_isGrounded || m_isOnConveyor || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
+		if ((m_isGrounded || (m_conveyor != null) || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
         {
             // Add jump force to the player
             m_rigidBody.AddForce(Vector2.up * JumpForce);
@@ -196,8 +194,8 @@ public class RobotController : MonoBehaviour
 		    m_rigidBody.velocity = 
 				MathHelper.Clamp(
 					m_rigidBody.velocity, 
-					new Vector2(-(MaxSpeed + ((m_isOnConveyor && m_conveyor.IsReverse) ? m_conveyor.Speed : 0)), Mathf.NegativeInfinity), 
-					new Vector2(MaxSpeed + ((m_isOnConveyor && !m_conveyor.IsReverse) ? m_conveyor.Speed : 0), Mathf.Infinity)
+					new Vector2(-(MaxSpeed + ((m_conveyor != null && m_conveyor.IsReverse) ? m_conveyor.Speed : 0)), Mathf.NegativeInfinity), 
+					new Vector2(MaxSpeed + ((m_conveyor != null && !m_conveyor.IsReverse) ? m_conveyor.Speed : 0), Mathf.Infinity)
 				);		
 			// Set the tread animation speed based on the horizontal speed
             Animator_Treads.SetFloat(Globals.ANIM_PARAM_SPEED, xSpeed * TreadAnimSpeedMultiplier);
@@ -362,14 +360,7 @@ public class RobotController : MonoBehaviour
     private void CheckIfOnConveyor()
 	{
 		if (m_conveyor != null) 
-		{
-			m_isOnConveyor = true;
 			m_conveyor.MovePlayer();
-		} 
-		else 
-		{
-			m_isOnConveyor = false;
-		}
 	}
 
     /// <summary>

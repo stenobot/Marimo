@@ -14,16 +14,14 @@ public class Conveyor : MonoBehaviour
 	// Holds reference for conveyor's animator
 	public Animator Animator_Conveyor;
 
-	// Holds reference to rigid body
-	private Rigidbody2D m_rig;
 	// Holds reference to player's rigidbody
 	private Rigidbody2D m_playerRig;
+
+	LayerMask ConveyorLayerMask;
 
 	// Use this for initialization
 	void Start() 
 	{
-		// Set the rigidbody
-		m_rig = GetComponent<Rigidbody2D>();
 		// Set player rigidbody
 		m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
 
