@@ -14,6 +14,7 @@ public class Globals
     public const string ANIMSTATE_ROBOT_RAISE = "raise";
     public const string ANIMSTATE_ROBOT_BUMP = "bump";
     public const string ANIMSTATE_ROBOT_JUMP = "jump";
+	public const string ANIMSTATE_WRENCH_TURN = "turn_wrench";
 	public const string ANIMSTATE_CONVEYOR_RIGHT = "moveright";
 	public const string ANIMSTATE_CONVEYOR_LEFT = "moveleft";
 
@@ -25,6 +26,9 @@ public class Globals
     public const string INPUT_AXIS_VERTICAL = "Vertical";
     // Buttons for input
     public const string INPUT_BUTTON_JUMP = "Jump";
+    public const string INPUT_BUTTON_FIRE1 = "Fire1";
+    public const string INPUT_BUTTON_FIRE2 = "Fire2";
+    public const string INPUT_BUTTON_FIRE3 = "Fire3";
 
     // Tags
     public const string TAG_GAMEMANAGER = "GameManager";
