@@ -14,16 +14,13 @@ public class Conveyor : MonoBehaviour
 	// Holds reference for conveyor's animator
 	public Animator Animator_Conveyor;
 
-	// Holds reference to player's rigidbody
-	private Rigidbody2D m_playerRig;
-
 	LayerMask ConveyorLayerMask;
 
 	// Use this for initialization
 	void Start() 
 	{
 		// Set player rigidbody
-		m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
+		//m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
 
 	}
 	
@@ -38,10 +35,10 @@ public class Conveyor : MonoBehaviour
 	/// Adds additional force or reduced force to the player
 	/// depending on the speed and direction of the conveyor
 	/// </summary>
-	public void MovePlayer()
+	private void MovePlayer(Rigidbody2D rig)
 	{
 		if (IsMoving) 
-			m_playerRig.AddForce(Vector2.right * Speed * ((IsReverse) ? -1 : 1));
+			rig.AddForce(Vector2.right * Speed * ((IsReverse) ? -1 : 1));
 	}
 
 	/// <summary>
@@ -62,5 +59,12 @@ public class Conveyor : MonoBehaviour
 	private void SetSpeed()
 	{
 		Animator_Conveyor.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
+	}
+
+	private void OnCollisionStay2D(Collision2D col)
+	{
+		Rigidbody2D rig = col.gameObject.GetComponent<Rigidbody2D> ();
+		if (rig != null)
+			MovePlayer (rig);
 	}
 }

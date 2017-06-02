@@ -114,15 +114,16 @@ public class RobotController : MonoBehaviour
         // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
         float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
         float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
+
         // Check if the Jump button is pressed
         bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
         // Test if the player is grounded, on a slope or an elevator
         CheckIfGrounded();
-        // Test if robot is on a conveyor belt, which will affect movement differently
-        CheckIfOnConveyor();
+
         // Compare the X and Y axis input and determine which should take preference
         SetMovementAxes(xAxisInput, yAxisInput);
+
         // Move the player vertically (if permitted)
         MoveVertical(yAxisInput);
 
@@ -321,8 +322,11 @@ public class RobotController : MonoBehaviour
 
         // Create 3 downward raycasts. One at the player center, one in front and one behind
         RaycastHit2D centerHit = Physics2D.Raycast(rayOrigin, rayDirection, rayLength, GroundLayerMask);
+		//Debug.DrawRay(rayOrigin, rayDirection, Color.green, .02f);
         RaycastHit2D frontHit = Physics2D.Raycast(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), Vector2.down, rayLength, GroundLayerMask);
+		//Debug.DrawRay(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), rayDirection, Color.green, .02f);
         RaycastHit2D rearHit = Physics2D.Raycast(new Vector2(rayOrigin.x - rayOffset, rayOrigin.y), rayDirection, rayLength, GroundLayerMask);
+		//Debug.DrawRay(new Vector2(rayOrigin.x - rayOffset, rayOrigin.y), rayDirection, Color.green, .02f);
 
         // Ensure the center collider is a hit
         if (centerHit.collider != null)
@@ -354,15 +358,6 @@ public class RobotController : MonoBehaviour
             m_isOnUpwardSlope = false;
             m_isOnDownwardSlope = false;
         }
-    }
-
-    /// <summary>
-    /// Checks if on conveyor and moves player
-    /// </summary>
-    private void CheckIfOnConveyor()
-    {
-        if (m_conveyor != null)
-            m_conveyor.MovePlayer();
     }
 
     /// <summary>
