@@ -330,14 +330,14 @@ public class RobotController : MonoBehaviour
             if (frontHit.collider != null)
             {
                 // Compare front and center hit points. 
-                // NOTE: After upgrading to Unity 5.6.1 the Y values were coming back in scientific notation with insignificant differences, so rounding.
+                // NOTE: After upgrading to Unity 5.6.1 the Y values were coming back in scientific notation with insignificant differences, so rounding
                 m_isOnDownwardSlope = Mathf.Round(centerHit.point.y * 1000) / 1000 > Mathf.Round(frontHit.point.y * 1000) / 1000;
                 m_isOnUpwardSlope = Mathf.Round(frontHit.point.y * 1000) / 1000 > Mathf.Round(centerHit.point.y * 1000) / 1000;
             }
             if (rearHit.collider != null)
             {
                 // Compare rear and center hit points
-                // NOTE: After upgrading to Unity 5.6.1 the Y values were coming back in scientific notation with insignificant differences, so rounding.
+                // NOTE: After upgrading to Unity 5.6.1 the Y values were coming back in scientific notation with insignificant differences, so rounding
                 m_isOnDownwardSlope = Mathf.Round(centerHit.point.y * 1000) / 1000 < Mathf.Round(rearHit.point.y * 1000) / 1000 ? true : m_isOnDownwardSlope;
                 m_isOnUpwardSlope = Mathf.Round(rearHit.point.y * 1000) / 1000 < Mathf.Round(centerHit.point.y * 1000) / 1000 ? true : m_isOnUpwardSlope;
             }
