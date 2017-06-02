@@ -18,11 +18,7 @@ public class Conveyor : MonoBehaviour
 
 	// Use this for initialization
 	void Start() 
-	{
-		// Set player rigidbody
-		//m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
-
-	}
+	{ }
 	
 	// Update is called once per frame
 	void Update() 
@@ -61,10 +57,14 @@ public class Conveyor : MonoBehaviour
 		Animator_Conveyor.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
 	}
 
+	/// <summary>
+	/// Raises the CollisionStay2D event, moves collided object.
+	/// </summary>
+	/// <param name="col">The 2D object collided with</param>
 	private void OnCollisionStay2D(Collision2D col)
 	{
-		Rigidbody2D rig = col.gameObject.GetComponent<Rigidbody2D> ();
+		Rigidbody2D rig = col.gameObject.GetComponent<Rigidbody2D>();
 		if (rig != null)
-			MovePlayer (rig);
+			MovePlayer(rig);
 	}
 }
