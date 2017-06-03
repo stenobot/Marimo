@@ -292,7 +292,7 @@ public class RobotController : MonoBehaviour
             int scale = xAxisInput < 0 ? -1 : 1;
             Animator_Treads.transform.localScale = new Vector2(scale, 1);
             Animator_Body.transform.localScale = new Vector2(scale, 1);
-            //Animator_ThoughtBubble.transform.localScale = new Vector3(-scale, 1);
+            Animator_ThoughtBubble.transform.localScale = new Vector3(scale, 1);
 
             // Add force to the player
             m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput);
