@@ -4,37 +4,56 @@ using UnityEngine;
 
 public class HintTrigger : MonoBehaviour
 {
-
+    public int SpeedPercentageDecreaseToTrigger = 20;
     private GameObject m_player;
     private Collider2D m_collider;
+    private Rigidbody2D m_playerRig;
     private Animator m_anim;
-    private bool m_hasShowedHint;
-    private float m_animLength;
+    private bool m_hasShownHint;
+    private float m_maxSpeed;
+    private float m_currentSpeed;
 
     // Use this for initialization
     void Start()
     {
         m_collider = GetComponent<Collider2D>();
-        m_hasShowedHint = false;
+        m_hasShownHint = false;
+        m_maxSpeed = 0;
+        m_currentSpeed = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (m_player != null && IsInterestExpressed() && !m_hasShowedHint)
+        if (m_player != null)
         {
-            ShowHint();
+            if (IsInterestExpressed())
+            {
+                ShowHint();
+            }
+            else if (m_hasShownHint)
+            {
+                HideHint();
+            }
         }
     }
 
     private bool IsInterestExpressed()
     {
-        return true;
+        if (m_playerRig == null)
+            return false;
+
+        m_currentSpeed = m_playerRig.velocity.magnitude;
+        m_maxSpeed = m_currentSpeed > m_maxSpeed ? m_currentSpeed : m_maxSpeed;
+        if (m_currentSpeed < (m_maxSpeed - ((m_maxSpeed / 100) * SpeedPercentageDecreaseToTrigger)))
+            return true;
+        else
+            return false;
     }
 
     private void ShowHint()
     {
-        if (m_anim != null)
+        if (!m_hasShownHint && m_anim != null)
         {
             AnimatorStateInfo animStateInfo = m_anim.GetCurrentAnimatorStateInfo(0);
             float currentAnimTime = 0;
@@ -43,13 +62,13 @@ public class HintTrigger : MonoBehaviour
 
             m_anim.Play(Globals.ANIMSTATE_HINT_APPEAR, 0, currentAnimTime);
             m_anim.SetFloat(Globals.ANIM_PARAM_SPEED, 1f);
-            m_hasShowedHint = true;
+            m_hasShownHint = true;
         }
     }
 
     private void HideHint()
     {
-        if (m_anim != null)
+        if (m_hasShownHint && m_anim != null)
         {
             AnimatorStateInfo animStateInfo = m_anim.GetCurrentAnimatorStateInfo(0);
             float currentAnimTime = 1;
@@ -58,7 +77,7 @@ public class HintTrigger : MonoBehaviour
 
             m_anim.Play(Globals.ANIMSTATE_HINT_APPEAR, 0, currentAnimTime);
             m_anim.SetFloat(Globals.ANIM_PARAM_SPEED, -1f);
-            m_hasShowedHint = false;
+            m_hasShownHint = false;
         }
     }
 
@@ -71,6 +90,7 @@ public class HintTrigger : MonoBehaviour
         {
             m_player = col.gameObject;
             m_anim = m_player.GetComponentInParent<RobotController>().Animator_ThoughtBubble;
+            m_playerRig = m_player.GetComponentInParent<Rigidbody2D>();
         }
     }
 
@@ -81,6 +101,8 @@ public class HintTrigger : MonoBehaviour
             HideHint();
             m_player = null;
             m_anim = null;
+            m_playerRig = null;
+            m_currentSpeed = 0;
         }
     }
 }
