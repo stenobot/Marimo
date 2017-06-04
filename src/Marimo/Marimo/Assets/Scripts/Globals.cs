@@ -17,6 +17,8 @@ public class Globals
 	public const string ANIMSTATE_WRENCH_TURN = "turn_wrench";
 	public const string ANIMSTATE_CONVEYOR_RIGHT = "moveright";
 	public const string ANIMSTATE_CONVEYOR_LEFT = "moveleft";
+    public const string ANIMSTATE_HINT_APPEAR = "appear";
+    public const string ANIMSTATE_HINT_IDLE_OPEN = "idle_open";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
