@@ -16,4 +16,17 @@ public class Enums
         None
     }
 
+    public enum ToolIcon
+    {
+        None,
+        Wrench,
+        UpDownArrows
+    }
+
+    public enum InteractionIcon
+    {
+        None,
+        Switch,
+        Elevator
+    }
 }

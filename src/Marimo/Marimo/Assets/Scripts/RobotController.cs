@@ -16,6 +16,18 @@ public class RobotController : MonoBehaviour
     public float MaximumImpactVelocity = 30f;
     // The smash effect gameobject to enable when the player is smashed
     public GameObject SmashEffectObj;
+    // Tracks if the player has died
+    public bool IsDead = true;
+    // Tracks if the player is in transit on an elevator or conveyor
+    public bool IsInTransit = false;
+    // Tracks if the player can show a thought bubble
+    public bool CanShowThoughtBubble
+    {
+        get
+        {
+            return !(IsDead || IsInTransit);
+        }
+    }
 
     // This is multiplied by the velocity to determine the speed of the treads animation
     public float TreadAnimSpeedMultiplier = 1f;
@@ -29,6 +41,9 @@ public class RobotController : MonoBehaviour
     // Animators
     public Animator Animator_Treads;
     public Animator Animator_Body;
+    public Animator Animator_ThoughtBubble;
+    public Animator Animator_ToolIcon;
+    public Animator Animator_InteractionIcon;
 
     // Sound effects
     public AudioClip Audio_Move;
@@ -49,7 +64,6 @@ public class RobotController : MonoBehaviour
     // Misc
     private bool m_isGrounded = true;
     private bool m_isMoving = false;
-    private bool m_isDead = false;
     private bool m_isOnDownwardSlope = false;
     private bool m_isOnUpwardSlope = false;
     private bool m_isNeckExtended = false;
@@ -68,6 +82,8 @@ public class RobotController : MonoBehaviour
         m_rigidBody = GetComponent<Rigidbody2D>();
         // Set the audio source reference
         m_audio = GetComponent<AudioSource>();
+        // Make player alive
+        IsDead = false;
         // Call invoke once per second to test if robot fell off screen
         InvokeRepeating("HasFallen", 1, 1);
     }
@@ -76,7 +92,7 @@ public class RobotController : MonoBehaviour
     void Update()
     {
         m_hasMovedForFrame = false;
-        if (!m_isDead)
+        if (!IsDead)
         {
             // Get the tread collider reference
             SetTreadCollider();
@@ -92,7 +108,7 @@ public class RobotController : MonoBehaviour
     {
         if (transform.position.y < Camera.main.GetComponent<FollowTarget>().MinYPosition)
         {
-            m_isDead = true;
+            IsDead = true;
             m_gameManager.GameOver();
             m_audio.Stop();
         }
@@ -234,6 +250,7 @@ public class RobotController : MonoBehaviour
         {
             Vector2 moveDir = yAxisInput > 0 ? Vector2.up : Vector2.down;
             m_elevator.Move(moveDir);
+            IsInTransit = true;
             return;
         }
 
@@ -291,6 +308,7 @@ public class RobotController : MonoBehaviour
             int scale = xAxisInput < 0 ? -1 : 1;
             Animator_Treads.transform.localScale = new Vector2(scale, 1);
             Animator_Body.transform.localScale = new Vector2(scale, 1);
+            Animator_ThoughtBubble.transform.localScale = new Vector3(scale, 1);
 
             // Add force to the player
             m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput);
@@ -420,7 +438,7 @@ public class RobotController : MonoBehaviour
     void OnCollisionEnter2D(Collision2D col)
     {
         // Only trigger if the player isn't already dead and the impact velocity exceeds the maximum impact velocity
-        if (!m_isDead && col.relativeVelocity.y > MaximumImpactVelocity)
+        if (!IsDead && col.relativeVelocity.y > MaximumImpactVelocity)
         {
             // Stop the player's rigidbody from moving any further
             m_rigidBody.isKinematic = true;
@@ -443,7 +461,7 @@ public class RobotController : MonoBehaviour
                 rig.AddTorque(UnityEngine.Random.Range(-30, 30));
             }
             // Kill the player
-            m_isDead = true;
+            IsDead = true;
             // Invoke game over screen after 1 second
             m_gameManager.Invoke("GameOver", 1.0f);
         }
