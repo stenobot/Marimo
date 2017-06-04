@@ -19,7 +19,8 @@ public class Globals
 	public const string ANIMSTATE_CONVEYOR_LEFT = "moveleft";
     public const string ANIMSTATE_HINT_APPEAR = "appear";
     public const string ANIMSTATE_HINT_IDLE_OPEN = "idle_open";
-
+    public const string ANIMSTATE_HINT_TOOL_WRENCH = "wrench";
+    public const string ANIMSTATE_HINT_INTERACTION_SWITCH = "switch";
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
 
@@ -36,4 +37,5 @@ public class Globals
     public const string TAG_GAMEMANAGER = "GameManager";
     public const string TAG_PLAYER = "Player";
     public const string TAG_GROUND = "Ground";
+    public const string TAG_TREADS = "Treads";
 }
