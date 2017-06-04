@@ -44,6 +44,7 @@ public class RobotController : MonoBehaviour
     private Rigidbody2D m_rigidBody;
     private AudioSource m_audio;
     private GameManager m_gameManager;
+    private Collider2D m_treadCollider;
 
     // Misc
     private bool m_isGrounded = true;
@@ -77,6 +78,8 @@ public class RobotController : MonoBehaviour
         m_hasMovedForFrame = false;
         if (!m_isDead)
         {
+            // Get the tread collider reference
+            SetTreadCollider();
             // Process input
             HandleInput();
         }
@@ -308,7 +311,10 @@ public class RobotController : MonoBehaviour
     private void CheckIfGrounded()
     {
         // Check if the player is touching the ground layer
-        m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
+        //m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
+        if (m_treadCollider != null)
+            m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask);
+
         Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
         m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
         Collider2D conveyorCol = Physics2D.OverlapCircle(transform.position, .05f, ConveyorLayerMask);
@@ -322,11 +328,11 @@ public class RobotController : MonoBehaviour
 
         // Create 3 downward raycasts. One at the player center, one in front and one behind
         RaycastHit2D centerHit = Physics2D.Raycast(rayOrigin, rayDirection, rayLength, GroundLayerMask);
-		//Debug.DrawRay(rayOrigin, rayDirection, Color.green, .02f);
-        RaycastHit2D frontHit = Physics2D.Raycast(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), Vector2.down, rayLength, GroundLayerMask);
-		//Debug.DrawRay(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), rayDirection, Color.green, .02f);
+        //Debug.DrawRay(rayOrigin, rayDirection * rayLength, Color.green, .02f);
+        RaycastHit2D frontHit = Physics2D.Raycast(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), rayDirection, rayLength, GroundLayerMask);
+        //Debug.DrawRay(new Vector2(rayOrigin.x + rayOffset, rayOrigin.y), rayDirection * rayLength, Color.green, .02f);
         RaycastHit2D rearHit = Physics2D.Raycast(new Vector2(rayOrigin.x - rayOffset, rayOrigin.y), rayDirection, rayLength, GroundLayerMask);
-		//Debug.DrawRay(new Vector2(rayOrigin.x - rayOffset, rayOrigin.y), rayDirection, Color.green, .02f);
+        //Debug.DrawRay(new Vector2(rayOrigin.x - rayOffset, rayOrigin.y), rayDirection * rayLength, Color.green, .02f);
 
         // Ensure the center collider is a hit
         if (centerHit.collider != null)
@@ -390,6 +396,21 @@ public class RobotController : MonoBehaviour
         animState = m_isOnDownwardSlope ? Globals.ANIMSTATE_MOVE_RIGHT_DOWN : animState;
         // Return the state
         return animState;
+    }
+
+    /// <summary>
+    /// Sets the tread collider to the active subcollider, as it is changed by the animator based on slope
+    /// </summary>
+    private void SetTreadCollider()
+    {
+        foreach (Collider2D col in Animator_Treads.gameObject.GetComponentsInChildren<Collider2D>())
+        {
+            if (col.isActiveAndEnabled)
+            {
+                m_treadCollider = col;
+                return;
+            }
+        }
     }
 
     /// <summary>
