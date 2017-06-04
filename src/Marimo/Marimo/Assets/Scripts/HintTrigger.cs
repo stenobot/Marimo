@@ -1,12 +1,31 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Triggers a hint in the player's thought bubble when it enters the trigger area
+/// </summary>
 public class HintTrigger : MonoBehaviour
 {
-    public Enums.ToolIcon ToolIcon;
-    public Enums.InteractionIcon InteractionIcon;
-    public bool CanShowHints = true;
+    #region Public editor variables
 
-    public int SpeedPercentageDecreaseToTrigger = 20;
+    /// <summary>
+    /// The tool icon to be displayed for this hint
+    /// </summary>
+    public Enums.ToolIcon ToolIcon;
+
+    /// <summary>
+    /// The interaction icon to be displayed for this hint
+    /// </summary>
+    public Enums.InteractionIcon InteractionIcon;
+
+    /// <summary>
+    /// The percentage of the maximum travelled speed the player must reduce by to invoke the trigger
+    /// </summary>
+    public int SpeedPercentageDecreaseToTrigger = 50;
+
+    #endregion
+
+    #region  Private variables
+
     private GameObject m_connectedPlayer;
     private Animator m_toolAnimator;
     private Animator m_interationAnimator;
@@ -17,7 +36,11 @@ public class HintTrigger : MonoBehaviour
     private float m_maxSpeed;
     private float m_currentSpeed;
 
-    // Use this for initialization
+    #endregion
+
+    /// <summary>
+    /// Used for initialization
+    /// </summary>
     void Start()
     {
         m_collider = GetComponent<Collider2D>();
@@ -26,15 +49,19 @@ public class HintTrigger : MonoBehaviour
         m_currentSpeed = 0;
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Update is called once per frame
+    /// </summary>
     void Update()
     {
+        // If a thought bubble can't be shown, hide it
         if (m_connectedPlayer == null || !m_connectedPlayer.GetComponentInParent<RobotController>().CanShowThoughtBubble)
         {
             HideHint();
         }
         else
         {
+            // only show the hint if the player expresses interest by slowing down
             if (IsInterestExpressed())
                 ShowHint();
             else if (m_hasShownHint)
@@ -42,6 +69,10 @@ public class HintTrigger : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks if the player has slowed down in the trigger area by the percentage specified in <see cref="SpeedPercentageDecreaseToTrigger"/>
+    /// </summary>
+    /// <returns>True if the player is interested</returns>
     private bool IsInterestExpressed()
     {
         if (m_playerRig == null)
@@ -55,6 +86,9 @@ public class HintTrigger : MonoBehaviour
             return false;
     }
 
+    /// <summary>
+    /// Shows the thought bubble with the hint
+    /// </summary>
     private void ShowHint()
     {
         if (m_hasShownHint)
@@ -101,7 +135,8 @@ public class HintTrigger : MonoBehaviour
             float currentAnimTime = 0;
             if (animStateInfo.IsName(Globals.ANIMSTATE_HINT_APPEAR))
                 currentAnimTime = animStateInfo.normalizedTime < 0 ? 0 : animStateInfo.normalizedTime;
-
+            
+            // Play the thought bubble animation from the current frame
             m_bubbleAnim.Play(Globals.ANIMSTATE_HINT_APPEAR, 0, currentAnimTime);
             m_bubbleAnim.SetFloat(Globals.ANIM_PARAM_SPEED, 1f);
             m_hasShownHint = true;
@@ -117,6 +152,7 @@ public class HintTrigger : MonoBehaviour
             if (animStateInfo.IsName(Globals.ANIMSTATE_HINT_APPEAR))
                 currentAnimTime = animStateInfo.normalizedTime > 1 ? 1 : animStateInfo.normalizedTime;
 
+            // Play the thought bubble animation from the current frame
             m_bubbleAnim.Play(Globals.ANIMSTATE_HINT_APPEAR, 0, currentAnimTime);
             m_bubbleAnim.SetFloat(Globals.ANIM_PARAM_SPEED, -1.5f);
 
@@ -129,6 +165,10 @@ public class HintTrigger : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Occurs when a <see cref="Collider2D"/> stays in the trigger area
+    /// </summary>
+    /// <param name="col">The <see cref="Collider2D"/> which is in the trigger area</param>
     private void OnTriggerStay2D(Collider2D col)
     {
         if (m_connectedPlayer != null)
@@ -145,6 +185,10 @@ public class HintTrigger : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Occurs when a <see cref="Collider2D"/> exits the trigger area
+    /// </summary>
+    /// <param name="col">The <see cref="Collider2D"/> which left the trigger area</param>
     private void OnTriggerExit2D(Collider2D col)
     {
         if (col.tag == Globals.TAG_TREADS)
