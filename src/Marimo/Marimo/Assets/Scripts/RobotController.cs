@@ -18,6 +18,16 @@ public class RobotController : MonoBehaviour
     public GameObject SmashEffectObj;
     // Tracks if the player has died
     public bool IsDead = true;
+    // Tracks if the player is in transit on an elevator or conveyor
+    public bool IsInTransit = false;
+    // Tracks if the player can show a thought bubble
+    public bool CanShowThoughtBubble
+    {
+        get
+        {
+            return !(IsDead || IsInTransit);
+        }
+    }
 
     // This is multiplied by the velocity to determine the speed of the treads animation
     public float TreadAnimSpeedMultiplier = 1f;
@@ -34,7 +44,6 @@ public class RobotController : MonoBehaviour
     public Animator Animator_ThoughtBubble;
     public Animator Animator_ToolIcon;
     public Animator Animator_InteractionIcon;
-
 
     // Sound effects
     public AudioClip Audio_Move;
@@ -241,6 +250,7 @@ public class RobotController : MonoBehaviour
         {
             Vector2 moveDir = yAxisInput > 0 ? Vector2.up : Vector2.down;
             m_elevator.Move(moveDir);
+            IsInTransit = true;
             return;
         }
 

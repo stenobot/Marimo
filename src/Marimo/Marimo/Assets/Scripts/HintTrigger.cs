@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class HintTrigger : MonoBehaviour
 {
@@ -31,7 +29,7 @@ public class HintTrigger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_connectedPlayer == null || m_connectedPlayer.GetComponentInParent<RobotController>().IsDead)
+        if (m_connectedPlayer == null || !m_connectedPlayer.GetComponentInParent<RobotController>().CanShowThoughtBubble)
         {
             HideHint();
         }

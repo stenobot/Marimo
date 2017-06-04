@@ -131,7 +131,9 @@ public class Elevator : MonoBehaviour
             (finalHeight == StopHeight && !m_startPositionIsBottom) ? true : false;
         IsAtTop = !IsAtBottom;
 
-        GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).transform.parent = null;
+        GameObject player = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER);
+        player.transform.parent = null;
+        player.GetComponent<RobotController>().IsInTransit = false;
 
     }
 }
