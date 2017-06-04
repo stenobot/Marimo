@@ -113,7 +113,7 @@ public class HintTrigger : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D col)
     {
-        if (col.tag == Globals.TAG_PLAYER)
+        if (col.tag == Globals.TAG_TREADS)
         {
             HideHint();
             m_player = null;
