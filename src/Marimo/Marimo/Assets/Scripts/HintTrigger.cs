@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class HintTrigger : MonoBehaviour
 {
-    public Animator ToolAnimator;
-    public Animator InterationAnimator;
+    public Enums.ToolIcon ToolIcon;
+    public Enums.InteractionIcon InteractionIcon;
+    public bool CanShowHints = true;
 
     public int SpeedPercentageDecreaseToTrigger = 20;
-    private GameObject m_player;
+    private GameObject m_connectedPlayer;
+    private Animator m_toolAnimator;
+    private Animator m_interationAnimator;
+    private Animator m_bubbleAnim;
     private Rigidbody2D m_playerRig;
     private Collider2D m_collider;
-    private Animator m_bubbleAnim;
     private bool m_hasShownHint;
     private float m_maxSpeed;
     private float m_currentSpeed;
@@ -28,16 +31,16 @@ public class HintTrigger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_player != null)
+        if (m_connectedPlayer == null || m_connectedPlayer.GetComponentInParent<RobotController>().IsDead)
+        {
+            HideHint();
+        }
+        else
         {
             if (IsInterestExpressed())
-            {
                 ShowHint();
-            }
             else if (m_hasShownHint)
-            {
                 HideHint();
-            }
         }
     }
 
@@ -59,10 +62,40 @@ public class HintTrigger : MonoBehaviour
         if (m_hasShownHint)
         {
             AnimatorStateInfo animStateInfo = m_bubbleAnim.GetCurrentAnimatorStateInfo(0);
-            if ((ToolAnimator != null) && animStateInfo.IsName(Globals.ANIMSTATE_HINT_IDLE_OPEN) && (animStateInfo.normalizedTime > 1.1))
-                    ToolAnimator.Play(Globals.ANIMSTATE_HINT_TOOL_WRENCH);
-            if ((InterationAnimator != null) && animStateInfo.IsName(Globals.ANIMSTATE_HINT_IDLE_OPEN) && (animStateInfo.normalizedTime > 1.1))
-                InterationAnimator.Play(Globals.ANIMSTATE_HINT_INTERACTION_SWITCH);
+            if ((m_toolAnimator != null) && animStateInfo.IsName(Globals.ANIMSTATE_HINT_IDLE_OPEN) && (animStateInfo.normalizedTime > 1))
+            {
+                string toolAnimState = "";
+                switch (ToolIcon)
+                {
+                    case Enums.ToolIcon.UpDownArrows:
+                        toolAnimState = Globals.ANIMSTATE_HINT_TOOL_UPDOWNARROWS;
+                        break;
+                    case Enums.ToolIcon.Wrench:
+                        toolAnimState = Globals.ANIMSTATE_HINT_TOOL_WRENCH;
+                        break;
+                    default:
+                        toolAnimState = Globals.ANIMSTATE_IDLE;
+                        break;
+                }
+                m_toolAnimator.Play(toolAnimState);
+            }
+            if ((m_interationAnimator != null) && animStateInfo.IsName(Globals.ANIMSTATE_HINT_IDLE_OPEN) && (animStateInfo.normalizedTime > 1))
+            {
+                string interactionAnimState = "";
+                switch (InteractionIcon)
+                {
+                    case Enums.InteractionIcon.Elevator:
+                        interactionAnimState = Globals.ANIMSTATE_HINT_INTERACTION_ELEVATOR;
+                        break;
+                    case Enums.InteractionIcon.Switch:
+                        interactionAnimState = Globals.ANIMSTATE_HINT_INTERACTION_SWITCH;
+                        break;
+                    default:
+                        interactionAnimState = Globals.ANIMSTATE_IDLE;
+                        break;
+                }
+                m_interationAnimator.Play(interactionAnimState);
+            }
         }
         else if (m_bubbleAnim != null)
         {
@@ -87,12 +120,12 @@ public class HintTrigger : MonoBehaviour
                 currentAnimTime = animStateInfo.normalizedTime > 1 ? 1 : animStateInfo.normalizedTime;
 
             m_bubbleAnim.Play(Globals.ANIMSTATE_HINT_APPEAR, 0, currentAnimTime);
-            m_bubbleAnim.SetFloat(Globals.ANIM_PARAM_SPEED, -1f);
+            m_bubbleAnim.SetFloat(Globals.ANIM_PARAM_SPEED, -1.5f);
 
-            if (ToolAnimator!=null)
-                ToolAnimator.Play(Globals.ANIMSTATE_IDLE);
-            if (InterationAnimator != null)
-                InterationAnimator.Play(Globals.ANIMSTATE_IDLE);
+            if (m_toolAnimator != null)
+                m_toolAnimator.Play(Globals.ANIMSTATE_IDLE);
+            if (m_interationAnimator != null)
+                m_interationAnimator.Play(Globals.ANIMSTATE_IDLE);
 
             m_hasShownHint = false;
         }
@@ -100,14 +133,17 @@ public class HintTrigger : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D col)
     {
-        if (m_player != null)
+        if (m_connectedPlayer != null)
             return;
 
         if (col.tag == Globals.TAG_TREADS)
         {
-            m_player = col.gameObject;
-            m_bubbleAnim = m_player.GetComponentInParent<RobotController>().Animator_ThoughtBubble;
-            m_playerRig = m_player.GetComponentInParent<Rigidbody2D>();
+            m_connectedPlayer = col.gameObject;
+            RobotController robot = m_connectedPlayer.GetComponentInParent<RobotController>();
+            m_bubbleAnim = robot.Animator_ThoughtBubble;
+            m_interationAnimator = robot.Animator_InteractionIcon;
+            m_toolAnimator = robot.Animator_ToolIcon;
+            m_playerRig = robot.GetComponent<Rigidbody2D>();
         }
     }
 
@@ -116,8 +152,10 @@ public class HintTrigger : MonoBehaviour
         if (col.tag == Globals.TAG_TREADS)
         {
             HideHint();
-            m_player = null;
+            m_connectedPlayer = null;
             m_bubbleAnim = null;
+            m_interationAnimator = null;
+            m_toolAnimator = null;
             m_playerRig = null;
             m_currentSpeed = 0;
         }
