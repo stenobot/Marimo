@@ -40,7 +40,7 @@ public class TrashDispensor : MonoBehaviour {
 
 		if (m_interval <= 0.0f) 
 		{
-			//TODO: create trash object, set it's sprite to random
+			//TODO: create trash object at, set it's sprite to random
 			m_interval = Speed;
 		}
 	}
