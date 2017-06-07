@@ -23,6 +23,7 @@ public class Globals
     public const string ANIMSTATE_HINT_INTERACTION_ELEVATOR = "elevator";
     public const string ANIMSTATE_HINT_TOOL_WRENCH = "wrench";
     public const string ANIMSTATE_HINT_TOOL_UPDOWNARROWS = "updownarrows";
+	public const string ANIMSTATE_DISPENSOR_ON = "dispensor_on";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
