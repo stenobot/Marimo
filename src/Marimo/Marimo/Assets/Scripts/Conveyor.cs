@@ -11,30 +11,70 @@ public class Conveyor : MonoBehaviour
 	// Tracks whether the conveyor belt is moving
 	public bool IsMoving;
 
-	// Holds reference for conveyor's animator
-	public Animator Animator_Conveyor;
+	// The conveyor's animator
+	private Animator m_animator;
 
-	LayerMask ConveyorLayerMask;
+	// A list of game objects that are on the conveyor
+	private List<GameObject> m_objects;
+
+	// Holds a reference to the constant force 2D component
+	private ConstantForce2D m_constantForce;
 
 	// Use this for initialization
 	void Start() 
-	{ }
+	{ 
+		m_objects = new List<GameObject>();
+		m_animator = GetComponent<Animator>();
+		m_constantForce = null;
+	}
 	
 	// Update is called once per frame
 	void Update() 
 	{
-		MoveConveyor();
+		// Set the speed of the conveyor animation
 		SetSpeed();
+
+		// Set conveyor movement animation
+		MoveConveyor();
+
+		// start or stop movement of all objects on conveyor
+		if (IsMoving)
+			StartObjectsMovement();
+		else
+			StopObjectsMovement();
 	}
 
 	/// <summary>
-	/// Adds additional force or reduced force to the player
-	/// depending on the speed and direction of the conveyor
+	/// Adds constant force to each of the colliding objects
+	/// based on the speed and direction of the conveyor.
 	/// </summary>
-	private void MovePlayer(Rigidbody2D rig)
+	private void StartObjectsMovement()
 	{
-		if (IsMoving) 
-			rig.AddForce(Vector2.right * Speed * ((IsReverse) ? -1 : 1));
+		foreach (GameObject obj in m_objects) 
+		{
+			// check if constant force component already exists
+			// so we only add it once
+			if (obj != null && !obj.GetComponent<ConstantForce2D>()) 
+			{
+				// add the component
+				m_constantForce = obj.AddComponent<ConstantForce2D>();
+				// set the component's speed and direction
+				m_constantForce.force = (IsReverse ? Vector2.left : Vector2.right) * Speed;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Stops all objects on conveyor
+	/// by destroying their constant force components
+	/// </summary>
+	private void StopObjectsMovement()
+	{
+		foreach (GameObject obj in m_objects) 
+		{
+			if (obj != null)
+				Destroy(obj.GetComponent<ConstantForce2D>());
+		}
 	}
 
 	/// <summary>
@@ -43,9 +83,9 @@ public class Conveyor : MonoBehaviour
 	private void MoveConveyor()
 	{ 
 		if (IsReverse)
-			Animator_Conveyor.Play(Globals.ANIMSTATE_CONVEYOR_LEFT);
+			m_animator.Play(Globals.ANIMSTATE_CONVEYOR_LEFT);
 		else
-			Animator_Conveyor.Play(Globals.ANIMSTATE_CONVEYOR_RIGHT);
+			m_animator.Play(Globals.ANIMSTATE_CONVEYOR_RIGHT);
 	}
 
 	/// <summary>
@@ -54,17 +94,38 @@ public class Conveyor : MonoBehaviour
 	/// </summary>
 	private void SetSpeed()
 	{
-		Animator_Conveyor.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
+		m_animator.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
 	}
 
 	/// <summary>
-	/// Raises the CollisionStay2D event, moves collided object.
+	/// Raises event when collision first occurs on an object.
 	/// </summary>
 	/// <param name="col">The 2D object collided with</param>
-	private void OnCollisionStay2D(Collision2D col)
+	private void OnCollisionEnter2D(Collision2D col)
 	{
-		Rigidbody2D rig = col.gameObject.GetComponent<Rigidbody2D>();
-		if (rig != null)
-			MovePlayer(rig);
+		if (col.gameObject == null)
+			return;
+
+		// add object to list if it's not already in there
+		if (!m_objects.Contains(col.gameObject)) 
+			m_objects.Add(col.gameObject);
+	}
+
+	/// <summary>
+	/// Raises event when collision of an object is exited.
+	/// </summary>
+	/// <param name="col">Col.</param>
+	private void OnCollisionExit2D(Collision2D col) 
+	{
+		if (col.gameObject == null)
+			return;
+
+		// destroy object's constant force component
+		if (col.gameObject.GetComponent<ConstantForce2D>())
+			Destroy(col.gameObject.GetComponent<ConstantForce2D>());
+
+		// remove object from the list
+		if (m_objects.Contains(col.gameObject)) 
+			m_objects.Remove(col.gameObject);			 
 	}
 }
