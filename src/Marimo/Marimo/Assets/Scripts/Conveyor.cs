@@ -11,8 +11,8 @@ public class Conveyor : MonoBehaviour
 	// Tracks whether the conveyor belt is moving
 	public bool IsMoving;
 
-	// Holds reference for conveyor's animator
-	public Animator Animator_Conveyor;
+	// The conveyor's animator
+	private Animator m_animator;
 
 	// A list of game objects that are on the conveyor
 	private List<GameObject> m_objects;
@@ -20,12 +20,11 @@ public class Conveyor : MonoBehaviour
 	// Holds a reference to the constant force 2D component
 	private ConstantForce2D m_constantForce;
 
-	LayerMask ConveyorLayerMask;
-
 	// Use this for initialization
 	void Start() 
 	{ 
 		m_objects = new List<GameObject>();
+		m_animator = GetComponent<Animator>();
 		m_constantForce = null;
 	}
 	
@@ -58,7 +57,7 @@ public class Conveyor : MonoBehaviour
 			if (obj != null && !obj.GetComponent<ConstantForce2D>()) 
 			{
 				// add the component
-				m_constantForce = obj.AddComponent(typeof(ConstantForce2D)) as ConstantForce2D;
+				m_constantForce = obj.AddComponent<ConstantForce2D>();
 				// set the component's speed and direction
 				m_constantForce.force = (IsReverse ? Vector2.left : Vector2.right) * Speed;
 			}
@@ -84,9 +83,9 @@ public class Conveyor : MonoBehaviour
 	private void MoveConveyor()
 	{ 
 		if (IsReverse)
-			Animator_Conveyor.Play(Globals.ANIMSTATE_CONVEYOR_LEFT);
+			m_animator.Play(Globals.ANIMSTATE_CONVEYOR_LEFT);
 		else
-			Animator_Conveyor.Play(Globals.ANIMSTATE_CONVEYOR_RIGHT);
+			m_animator.Play(Globals.ANIMSTATE_CONVEYOR_RIGHT);
 	}
 
 	/// <summary>
@@ -95,7 +94,7 @@ public class Conveyor : MonoBehaviour
 	/// </summary>
 	private void SetSpeed()
 	{
-		Animator_Conveyor.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
+		m_animator.SetFloat(Globals.ANIM_PARAM_SPEED, (IsMoving ? (Speed / 5) : 0));
 	}
 
 	/// <summary>
