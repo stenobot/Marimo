@@ -127,6 +127,7 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 		{
 			if (obj != null) 
 			{
+				// clamp object velocity so it doesn't continue to accelerate
 				Rigidbody2D rig = obj.GetComponent<Rigidbody2D>();
 				rig.velocity =
 					MathHelper.Clamp(
@@ -135,20 +136,18 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 						new Vector2((Speed / 8), Mathf.Infinity)
 					);
 
-			}
-			// check if constant force component already exists
-			// so we only add it once
-			if (obj != null && obj.GetComponent<ConstantForce2D>() == null) 
-			{
-				// add the component
-				m_constantForce = obj.AddComponent<ConstantForce2D>();
+				// check if constant force component already exists
+				// so we only add it once
+				if (obj.GetComponent<ConstantForce2D>() == null) 
+				{
+					// add the component
+					m_constantForce = obj.AddComponent<ConstantForce2D>();
 
-				// set the component's speed and direction
-				m_constantForce.relativeForce = (IsReverse ? Vector2.left : Vector2.right) * Speed;
+					// set the component's speed and direction
+					m_constantForce.relativeForce = (IsReverse ? Vector2.left : Vector2.right) * Speed;
+				}
 			}
 		}
-
-
 	}
 
 	/// <summary>
