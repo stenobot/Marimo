@@ -95,14 +95,14 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 		{
 			// increment current x offset if it's less than 1
 			if (m_currOffset < 1)
-				m_currOffset += 0.01f;
+				m_currOffset += 0.005f;
 
 			// move toward the offset position
 			transform.position = Vector2.Lerp(m_startingPosition, m_offsetPosition, m_currOffset);
 		} else if (m_currOffset > 0) 
 		{
 			// move conveyor back toward starting position
-			m_currOffset -= 0.01f;
+			m_currOffset -= 0.005f;
 			transform.position = Vector2.Lerp(m_startingPosition, m_offsetPosition, m_currOffset);
 		}
 	}
@@ -127,14 +127,18 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 		{
 			if (obj != null) 
 			{
-				// clamp object velocity so it doesn't continue to accelerate
-				Rigidbody2D rig = obj.GetComponent<Rigidbody2D>();
-				rig.velocity =
-					MathHelper.Clamp(
-						rig.velocity,
-						new Vector2(-(Speed / 8), Mathf.NegativeInfinity),
-						new Vector2((Speed / 8), Mathf.Infinity)
-					);
+				// only clamp for max speed if object is not the player
+				if (!obj.CompareTag(Globals.TAG_PLAYER)) 
+				{
+					// clamp object velocity so it doesn't continue to accelerate
+					Rigidbody2D rig = obj.GetComponent<Rigidbody2D>();
+					rig.velocity =
+						MathHelper.Clamp(
+							rig.velocity,
+							new Vector2(-(Speed / 8), Mathf.NegativeInfinity),
+							new Vector2((Speed / 8), Mathf.Infinity)
+						);
+				}
 
 				// check if constant force component already exists
 				// so we only add it once
