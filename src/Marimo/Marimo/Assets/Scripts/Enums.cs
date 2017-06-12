@@ -29,4 +29,13 @@ public class Enums
         Switch,
         Elevator
     }
+
+	public enum ConveyorInteraction
+	{
+		Direction,
+		Speed,
+		Position,
+		Moving,
+		None
+	}
 }
