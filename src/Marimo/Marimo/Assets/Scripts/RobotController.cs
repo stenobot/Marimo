@@ -458,7 +458,7 @@ public class RobotController : MonoBehaviour
                 // Reverse the impact force and apply it to the rigidbody
                 rig.AddForce(col.relativeVelocity * -1, ForceMode2D.Impulse);
                 // Add randomized torque to cause some rotation
-                rig.AddTorque(UnityEngine.Random.Range(-30, 30));
+                //rig.AddTorque(UnityEngine.Random.Range(-30, 30));
             }
             // Kill the player
             IsDead = true;
