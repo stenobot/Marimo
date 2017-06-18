@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TrashDispensor : MonoBehaviour {
 
@@ -13,8 +11,8 @@ public class TrashDispensor : MonoBehaviour {
 	// The dispensor's animator component
 	private Animator m_animator;
 
-	// Pool of pre-defined trash objects
-	private GameObject[] m_trash;
+	// Pool of trash objects
+    private Trash[] m_trash;
 
 	// Tracks the index of the most recently dispensed piece of trash
 	private int m_trashIndex;
@@ -31,12 +29,8 @@ public class TrashDispensor : MonoBehaviour {
 		// get the dispensor's animator
 		m_animator = GetComponent<Animator>();
 
-		// create a pool of pre-defined tagged trash objects
-		m_trash = GameObject.FindGameObjectsWithTag(Globals.TAG_TRASH);
-
-		// initialize each piece of trash
-		foreach (GameObject trash in m_trash) 
-			InitializeTrash(trash);
+		// create a pool of all trash objects
+        m_trash = FindObjectsOfType<Trash>();
 
 		// initialize index
 		m_trashIndex = 0;
@@ -78,15 +72,11 @@ public class TrashDispensor : MonoBehaviour {
 			else
 				m_trashIndex++;
 
-			// if trash is already active, re-initialize
-			if (m_trash[m_trashIndex].activeSelf)
-				InitializeTrash(m_trash[m_trashIndex]);
-
-			// activate trash
-			m_trash[m_trashIndex].SetActive(true);
-
-			// reset current interval
-			m_currInterval = Interval;
+            // activate trash
+            InitializeTrash(m_trash[m_trashIndex]);
+            
+            // reset current interval
+            m_currInterval = Interval;
 		}
 	}
 
@@ -95,9 +85,9 @@ public class TrashDispensor : MonoBehaviour {
 	/// setting it to the center position of the dispensor
 	/// </summary>
 	/// <param name="trash">Trash game object</param>
-	private void InitializeTrash(GameObject trash)
+	private void InitializeTrash(Trash trash)
 	{
-		trash.SetActive(false);
-		trash.transform.position = new Vector2(transform.position.x + 1.5f, transform.position.y + 1.5f);
+        trash.transform.position = new Vector2(transform.position.x + 1.5f, transform.position.y + 1.5f);
+        m_trash[m_trashIndex].IsActive = true;
 	}
 }

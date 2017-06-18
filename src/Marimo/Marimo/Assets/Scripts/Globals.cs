@@ -43,4 +43,5 @@ public class Globals
     public const string TAG_GROUND = "Ground";
     public const string TAG_TREADS = "Treads";
 	public const string TAG_TRASH = "Trash";
+    public const string TAG_CONVEYOR = "Conveyor";
 }

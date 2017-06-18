@@ -21,4 +21,25 @@ static class MathHelper
         newPos.y = newPos.y > maxPos.y ? maxPos.y : newPos.y;
         return newPos;
     }
+
+    /// <summary>
+    /// Used to trigger on a staggered rhythm as a value decreases, 
+    /// based on a starting value.
+    /// </summary>
+    /// <param name="currValue">The current decreasing value</param>
+    /// <param name="startValue">The starting value</param>
+    /// <returns></returns>
+    public static bool StaggerTrigger(float currValue, float startValue)
+    {
+        float stopOne = ((startValue / 3) * 2);
+        float stopTwo = startValue / 3;
+        float stopThree = startValue / 10;
+
+        if ((currValue < stopOne && currValue > (stopOne - 0.05f)) ||
+            (currValue < stopTwo && currValue > (stopTwo - 0.05f)) ||
+            (currValue < stopThree && currValue > (stopThree - 0.05f)))
+            return true;
+        else
+            return false;
+    }
 }
