@@ -11,9 +11,7 @@ public class TrashDispensor : MonoBehaviour {
 	// The dispensor's animator component
 	private Animator m_animator;
 
-	// Pool of pre-defined trash objects
-	//private GameObject[] m_trash;
-
+	// Pool of trash objects
     private Trash[] m_trash;
 
 	// Tracks the index of the most recently dispensed piece of trash
@@ -31,14 +29,8 @@ public class TrashDispensor : MonoBehaviour {
 		// get the dispensor's animator
 		m_animator = GetComponent<Animator>();
 
-		// create a pool of pre-defined tagged trash objects
-		//m_trash = GameObject.FindGameObjectsWithTag(Globals.TAG_TRASH);
-
+		// create a pool of all trash objects
         m_trash = FindObjectsOfType<Trash>();
-
-		// initialize each piece of trash
-		//foreach (GameObject trash in m_trash) 
-			//InitializeTrash(trash);
 
 		// initialize index
 		m_trashIndex = 0;
@@ -80,18 +72,8 @@ public class TrashDispensor : MonoBehaviour {
 			else
 				m_trashIndex++;
 
-           // m_trash[m_trashIndex].Is
-
-			// if trash is already active, re-initialize
-			//if (m_trash[m_trashIndex].IsActive)
-			//	InitializeTrash(m_trash[m_trashIndex]);
-
             // activate trash
             InitializeTrash(m_trash[m_trashIndex]);
-            
-
-            
-            
             
             // reset current interval
             m_currInterval = Interval;

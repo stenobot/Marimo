@@ -1,130 +1,175 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Trash : MonoBehaviour
 {
     /// <summary>
-    /// Tracks if the trash is active
+    /// Tracks if the trash is active or deactivated
     /// </summary>
     public bool IsActive;
 
-    private bool m_isActivated;
-
+    /// <summary>
+    /// The object containing the trash smash effect
+    /// </summary>
     public GameObject SmashEffectObj;
 
-    private float m_trashPartsFadeOutTimer;
+    // components for the smashing trash parts
     private Rigidbody2D[] m_trashPartRigs;
     private SpriteRenderer[] m_trashPartRenderers;
-    private bool m_isSmashing;
-    private float m_alpha;
-    private float m_maxAlpha;
-
+    private Collider2D[] m_trashPartColliders;
+    
+    // components for the main trash object
     private Rigidbody2D m_rigidBody;
     private Collider2D m_collider;
     private SpriteRenderer m_renderer;
     private Animator m_animator;
 
+    // misc
+    private bool m_isTrashActivated;
+    private float m_trashPartsFadeOutTimer;
+    private bool m_isSmashed;
+    private float m_alpha;
+    private float m_maxAlpha;
+    private float m_maxFallSpeed;
+    private float m_maxImpactVelocity;
 
-    // Use this for initialization
+    // object initialization
     void Start()
     {
-        
+        SmashEffectObj.SetActive(true);
 
-       // gameObject.SetActive(false);
         m_rigidBody = GetComponent<Rigidbody2D>();
         m_collider = GetComponent<Collider2D>();
         m_renderer = GetComponent<SpriteRenderer>();
         m_animator = GetComponent<Animator>();
 
-        m_isActivated = false;
+        m_trashPartRigs = SmashEffectObj.GetComponentsInChildren<Rigidbody2D>();
+        m_trashPartRenderers = SmashEffectObj.GetComponentsInChildren<SpriteRenderer>();
+        m_trashPartColliders = SmashEffectObj.GetComponentsInChildren<Collider2D>();
+
+        m_isTrashActivated = false;
         m_trashPartsFadeOutTimer = 1f;
         m_alpha = 1f;
         m_maxAlpha = 1f;
-        m_isSmashing = false;
+        m_isSmashed = false;
+        m_maxFallSpeed = 16f;
+        m_maxImpactVelocity = 6f;
 
-        m_trashPartRigs = SmashEffectObj.GetComponentsInChildren<Rigidbody2D>();
-        m_trashPartRenderers = SmashEffectObj.GetComponentsInChildren<SpriteRenderer>();
-
-        // start each object deactivated
-        // trash must be activated from an outside source
-        Deactivate();
+        // start each trash object and smash effect object deactivated
+        ResetTrash();
+        ResetSmashedTrash();
     }
 	
-	// Update is called once per frame
+	// object update once per frame
 	void Update()
     {
-        // check if trash has been activated so we only 
-        // activate once each time needed
-        if (IsActive && !m_isActivated)
-            Activate();
+        if (IsActive)
+        {
+            // check if trash has not been activated, 
+            // so we only activate once each time needed
+            if (!m_isTrashActivated)
+                ActivateTrash();
 
-        // check that object has started smashing
-        if (m_isSmashing)
-            SmashTrashParts();
-	}
+            CheckFallSpeed();
+        }
 
+        // check if object smash has started, and begin the fade out
+        if (m_isSmashed)
+            FadeOutSmashedTrash();
+    }
+
+    /// <summary>
+    /// Fires when trash object is collided with.
+    /// Allows trash to land safely on a conveyor, but 
+    /// break on collision with anything else
+    /// </summary>
+    /// <param name="col">The collision object</param>
     void OnCollisionEnter2D(Collision2D col)
     {
         if (IsActive && 
-            Mathf.Abs(col.relativeVelocity.y) > 10 && 
+            Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
             col.gameObject.tag != Globals.TAG_CONVEYOR)
         {
             // track that we are now smashing
-            m_isSmashing = true;
+            m_isSmashed = true;
 
             // deactivate trash object
-            Deactivate();
-       
-            // activate smash effect object
-            SmashEffectObj.SetActive(true);
+            ResetTrash();
 
-            // add force to trash parts' rigid bodies
+            // enable colliders
+           foreach (Collider2D collider in m_trashPartColliders)
+                collider.enabled = true;
+
             foreach (Rigidbody2D rig in m_trashPartRigs)
             {
+                // reset rigid bodies and set position
+                rig.constraints = RigidbodyConstraints2D.FreezeRotation;
+                rig.position = gameObject.transform.position;
                 rig.velocity = Vector2.zero;
-                rig.AddForce(new Vector2(Random.Range(-8, 8), Mathf.Abs(col.relativeVelocity.y / 2)), ForceMode2D.Impulse);
 
-                //Debug.Log("impulse force added to: " + rig);
+                // add force to rigid bodies
+                rig.AddForce(new Vector2(Random.Range(-8, 8), Mathf.Abs(col.relativeVelocity.y / 2)), ForceMode2D.Impulse);
             }
+
+            // enable renderers after position has changed
+            foreach (SpriteRenderer renderer in m_trashPartRenderers)
+                renderer.enabled = true;
         }
     }
 
-    private void Activate()
+    /// <summary>
+    /// Restricts the object falling speed to the max speed
+    /// </summary>
+    private void CheckFallSpeed()
+    {
+        m_rigidBody.velocity =
+            MathHelper.Clamp(
+                m_rigidBody.velocity,
+                new Vector2(Mathf.NegativeInfinity, -m_maxFallSpeed),
+                new Vector2(Mathf.Infinity, m_maxFallSpeed)
+            );
+    }
+
+    /// <summary>
+    /// Activate trash object and start it's animation
+    /// </summary>
+    private void ActivateTrash()
     {
         m_rigidBody.velocity = Vector2.zero;
-
-        Debug.Log("activate: " + gameObject + 
-            " position: " + gameObject.transform.position + 
-            " velocity: " + gameObject.GetComponent<Rigidbody2D>().velocity);
-
-        gameObject.SetActive(true);
 
         // enable renderer and collider, and remove all constraints
         m_renderer.enabled = true;
         m_collider.enabled = true;
         m_animator.enabled = true;
-        
-        m_rigidBody.constraints = RigidbodyConstraints2D.None;
 
-        // only activate once as needed
-        m_isActivated = true;
+        m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
+        m_animator.Play("dispensing_trash", -1, 0f);
+
+        // set to true so we don't activate again this session
+        m_isTrashActivated = true;
     }
 
-    private void Deactivate()
+    /// <summary>
+    /// Disable a trash object
+    /// </summary>
+    private void ResetTrash()
     {
         // disable object's sprite renderer and collider components
         m_renderer.enabled = false;
         m_collider.enabled = false;
         m_animator.enabled = false;
+
         // freeze game object so it doesn't fall when collider is disabled
         m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
 
         IsActive = false;
-        m_isActivated = false;
+        m_isTrashActivated = false;
     }
 
-    private void SmashTrashParts()
+    /// <summary>
+    /// Begin the fade out of the smashed trash effect.
+    /// When it is finished, reset the smashed trash effect.
+    /// </summary>
+    private void FadeOutSmashedTrash()
     {
         // update backup timer that will start fadeout if rigidbody check fails
         if (m_trashPartsFadeOutTimer > 0)
@@ -157,27 +202,15 @@ public class Trash : MonoBehaviour
         }
         else
         {
-            ResetTrash();
-
-            IsActive = false;
-            SmashEffectObj.SetActive(false);
-            gameObject.SetActive(false);
-
+            ResetSmashedTrash();
         }
     }
 
-    private void ResetTrash()
+    /// <summary>
+    /// Reset the smashed trash effect.
+    /// </summary>
+    private void ResetSmashedTrash()
     {
-        foreach (Rigidbody2D rig in m_trashPartRigs)
-        {
-            rig.position = Vector2.zero;
-
-            Debug.Log("rigidbody position after fadeout: " + rig.position);
-        }
-
-        Debug.Log("game object oposition after fadeout: " + gameObject.transform.position);
-        Debug.Log("smash object opsition after fadout" + SmashEffectObj.transform.position);
-
         m_alpha = 1f;
 
         foreach (SpriteRenderer renderer in m_trashPartRenderers)
@@ -185,8 +218,23 @@ public class Trash : MonoBehaviour
             Color color = renderer.material.color;
             color.a = m_alpha;
             renderer.material.SetColor("_Color", color);
+
+            renderer.enabled = false;
         }
 
-        m_isSmashing = false;
+        foreach (Collider2D collider in m_trashPartColliders)
+        {
+            collider.enabled = false;
+        }
+        Debug.Log(gameObject.transform.position);
+        Debug.Log(SmashEffectObj.transform.position);
+
+        foreach (Rigidbody2D rig in m_trashPartRigs)
+        {
+            rig.constraints = RigidbodyConstraints2D.FreezeAll;
+            Debug.Log(rig.position);
+        }
+        
+        m_isSmashed = false;
     }
 }

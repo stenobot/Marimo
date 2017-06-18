@@ -437,8 +437,13 @@ public class RobotController : MonoBehaviour
     /// <param name="col">The <see cref="Collision2D"/> of the object the player collided with</param>
     void OnCollisionEnter2D(Collision2D col)
     {
-        // Only trigger if the player isn't already dead and the impact velocity exceeds the maximum impact velocity
-        if (!IsDead && col.relativeVelocity.y > MaximumImpactVelocity)
+        // Only trigger if the player isn't already dead  
+        // and the impact velocity exceeds the maximum impact velocity
+        // or the player collides with trash. 
+        // TODO: proper impact collision system with destructive game objects
+        if (!IsDead && 
+            (col.relativeVelocity.y > MaximumImpactVelocity ||
+            col.gameObject.tag == Globals.TAG_TRASH))
         {
             // Stop the player's rigidbody from moving any further
             m_rigidBody.isKinematic = true;
