@@ -7,6 +7,8 @@ public class Trash : MonoBehaviour
     /// </summary>
     public bool IsActive;
 
+    public bool IsDynamic;
+
     /// <summary>
     /// The object containing the trash smash effect
     /// </summary>
@@ -37,16 +39,22 @@ public class Trash : MonoBehaviour
     {
         SmashEffectObj.SetActive(true);
 
-        m_rigidBody = GetComponent<Rigidbody2D>();
+        
         m_collider = GetComponent<Collider2D>();
         m_renderer = GetComponent<SpriteRenderer>();
-        m_animator = GetComponent<Animator>();
+
+        if (IsDynamic)
+        {
+            m_rigidBody = GetComponent<Rigidbody2D>();
+            m_animator = GetComponent<Animator>();
+        }
+        
 
         m_trashPartRigs = SmashEffectObj.GetComponentsInChildren<Rigidbody2D>();
         m_trashPartRenderers = SmashEffectObj.GetComponentsInChildren<SpriteRenderer>();
         m_trashPartColliders = SmashEffectObj.GetComponentsInChildren<Collider2D>();
 
-        m_isTrashActivated = false;
+        m_isTrashActivated = true;
         m_trashPartsFadeOutTimer = 1f;
         m_alpha = 1f;
         m_maxAlpha = 1f;
@@ -54,8 +62,11 @@ public class Trash : MonoBehaviour
         m_maxFallSpeed = 16f;
         m_maxImpactVelocity = 6f;
 
-        // start each trash object and smash effect object deactivated
-        ResetTrash();
+        // if trash object is dynamic, start off deactivated 
+        if (IsDynamic)
+            ResetTrash();
+
+        // start each smash effect object deactivated
         ResetSmashedTrash();
     }
 	
@@ -68,8 +79,9 @@ public class Trash : MonoBehaviour
             // so we only activate once each time needed
             if (!m_isTrashActivated)
                 ActivateTrash();
-
-            CheckFallSpeed();
+            
+            if (IsDynamic)
+                CheckFallSpeed();
         }
 
         // check if object smash has started, and begin the fade out
@@ -134,15 +146,19 @@ public class Trash : MonoBehaviour
     /// </summary>
     private void ActivateTrash()
     {
-        m_rigidBody.velocity = Vector2.zero;
+        if (m_rigidBody != null)
+            m_rigidBody.velocity = Vector2.zero;
 
         // enable renderer and collider, and remove all constraints
         m_renderer.enabled = true;
         m_collider.enabled = true;
         m_animator.enabled = true;
 
-        m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
-        m_animator.Play("dispensing_trash", -1, 0f);
+        if (m_rigidBody != null)
+            m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        if (m_animator != null)
+            m_animator.Play("dispensing_trash", -1, 0f);
 
         // set to true so we don't activate again this session
         m_isTrashActivated = true;
@@ -156,10 +172,15 @@ public class Trash : MonoBehaviour
         // disable object's sprite renderer and collider components
         m_renderer.enabled = false;
         m_collider.enabled = false;
-        m_animator.enabled = false;
 
-        // freeze game object so it doesn't fall when collider is disabled
-        m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
+        if (IsDynamic)
+        {
+            
+            m_animator.enabled = false;
+
+            // freeze game object so it doesn't fall when collider is disabled
+            m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
+        }            
 
         IsActive = false;
         m_isTrashActivated = false;
