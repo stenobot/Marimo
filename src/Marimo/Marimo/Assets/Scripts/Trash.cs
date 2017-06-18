@@ -223,17 +223,10 @@ public class Trash : MonoBehaviour
         }
 
         foreach (Collider2D collider in m_trashPartColliders)
-        {
             collider.enabled = false;
-        }
-        Debug.Log(gameObject.transform.position);
-        Debug.Log(SmashEffectObj.transform.position);
 
         foreach (Rigidbody2D rig in m_trashPartRigs)
-        {
             rig.constraints = RigidbodyConstraints2D.FreezeAll;
-            Debug.Log(rig.position);
-        }
         
         m_isSmashed = false;
     }

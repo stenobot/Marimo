@@ -89,6 +89,5 @@ public class TrashDispensor : MonoBehaviour {
 	{
         trash.transform.position = new Vector2(transform.position.x + 1.5f, transform.position.y + 1.5f);
         m_trash[m_trashIndex].IsActive = true;
-        Debug.Log("dispense: " + trash + " position: " + trash.transform.position);
 	}
 }
