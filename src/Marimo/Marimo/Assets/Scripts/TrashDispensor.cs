@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class TrashDispensor : MonoBehaviour {
 
@@ -12,7 +13,7 @@ public class TrashDispensor : MonoBehaviour {
 	private Animator m_animator;
 
 	// Pool of trash objects
-    private Trash[] m_trash;
+    private List<Trash> m_trash;
 
 	// Tracks the index of the most recently dispensed piece of trash
 	private int m_trashIndex;
@@ -29,9 +30,9 @@ public class TrashDispensor : MonoBehaviour {
 		// get the dispensor's animator
 		m_animator = GetComponent<Animator>();
 
-		// create a pool of all trash objects
-        m_trash = FindObjectsOfType<Trash>();
-
+        // create trash object pool
+        InitializeTrashPool();
+        
 		// initialize index
 		m_trashIndex = 0;
 	}
@@ -46,6 +47,22 @@ public class TrashDispensor : MonoBehaviour {
 		if (IsOn)
 			RunDispensor();
 	}
+
+    /// <summary>
+    /// Creates a pool of trash objects for the dispensor to use
+    /// </summary>
+    private void InitializeTrashPool()
+    {
+        // initialize the list
+        m_trash = new List<Trash>();
+
+        // get trash game objects
+        GameObject[] objects = GameObject.FindGameObjectsWithTag(Globals.TAG_TRASH);
+
+        // add trash game objects to list
+        foreach (GameObject obj in objects)
+            m_trash.Add(obj.GetComponent<Trash>());
+    }
 
 	/// <summary>
 	/// Sets the dispensor animation based on Interval speed
@@ -67,7 +84,7 @@ public class TrashDispensor : MonoBehaviour {
 		if (m_currInterval <= 0.0f) 
 		{
 			// either reset index or increment
-			if (m_trashIndex == m_trash.Length - 1)
+			if (m_trashIndex == m_trash.Count - 1)
 				m_trashIndex = 0;
 			else
 				m_trashIndex++;

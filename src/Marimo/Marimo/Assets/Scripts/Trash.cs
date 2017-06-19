@@ -8,6 +8,11 @@ public class Trash : MonoBehaviour
     public bool IsActive;
 
     /// <summary>
+    /// Tracks if the trash object is static (non-moving) or dynamic
+    /// </summary>
+    public bool IsDynamic;
+
+    /// <summary>
     /// The object containing the trash smash effect
     /// </summary>
     public GameObject SmashEffectObj;
@@ -37,25 +42,34 @@ public class Trash : MonoBehaviour
     {
         SmashEffectObj.SetActive(true);
 
-        m_rigidBody = GetComponent<Rigidbody2D>();
+        
         m_collider = GetComponent<Collider2D>();
         m_renderer = GetComponent<SpriteRenderer>();
-        m_animator = GetComponent<Animator>();
+
+        if (IsDynamic)
+        {
+            m_rigidBody = GetComponent<Rigidbody2D>();
+            m_animator = GetComponent<Animator>();
+        }
+        
 
         m_trashPartRigs = SmashEffectObj.GetComponentsInChildren<Rigidbody2D>();
         m_trashPartRenderers = SmashEffectObj.GetComponentsInChildren<SpriteRenderer>();
         m_trashPartColliders = SmashEffectObj.GetComponentsInChildren<Collider2D>();
 
-        m_isTrashActivated = false;
-        m_trashPartsFadeOutTimer = 1f;
+        m_isTrashActivated = true;
+        m_trashPartsFadeOutTimer = 0.8f;
         m_alpha = 1f;
         m_maxAlpha = 1f;
         m_isSmashed = false;
         m_maxFallSpeed = 16f;
         m_maxImpactVelocity = 6f;
 
-        // start each trash object and smash effect object deactivated
-        ResetTrash();
+        // if trash object is dynamic, start off deactivated 
+        if (IsDynamic)
+            ResetTrash();
+
+        // start each smash effect object deactivated
         ResetSmashedTrash();
     }
 	
@@ -68,8 +82,9 @@ public class Trash : MonoBehaviour
             // so we only activate once each time needed
             if (!m_isTrashActivated)
                 ActivateTrash();
-
-            CheckFallSpeed();
+            
+            if (IsDynamic)
+                CheckFallSpeed();
         }
 
         // check if object smash has started, and begin the fade out
@@ -87,7 +102,8 @@ public class Trash : MonoBehaviour
     {
         if (IsActive && 
             Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
-            col.gameObject.tag != Globals.TAG_CONVEYOR)
+            col.gameObject.tag != Globals.TAG_CONVEYOR && 
+            col.gameObject.tag != Globals.TAG_TRASH_PART)
         {
             // track that we are now smashing
             m_isSmashed = true;
@@ -134,15 +150,16 @@ public class Trash : MonoBehaviour
     /// </summary>
     private void ActivateTrash()
     {
-        m_rigidBody.velocity = Vector2.zero;
+        if (IsDynamic)
+        {
+            m_rigidBody.velocity = Vector2.zero;
+            m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
+            m_animator.enabled = true;
+            m_animator.Play("dispensing_trash", -1, 0f);
+            m_collider.enabled = true;
+        }
 
-        // enable renderer and collider, and remove all constraints
         m_renderer.enabled = true;
-        m_collider.enabled = true;
-        m_animator.enabled = true;
-
-        m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
-        m_animator.Play("dispensing_trash", -1, 0f);
 
         // set to true so we don't activate again this session
         m_isTrashActivated = true;
@@ -156,10 +173,15 @@ public class Trash : MonoBehaviour
         // disable object's sprite renderer and collider components
         m_renderer.enabled = false;
         m_collider.enabled = false;
-        m_animator.enabled = false;
 
-        // freeze game object so it doesn't fall when collider is disabled
-        m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
+        if (IsDynamic)
+        {
+            
+            m_animator.enabled = false;
+
+            // freeze game object so it doesn't fall when collider is disabled
+            m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
+        }            
 
         IsActive = false;
         m_isTrashActivated = false;
@@ -198,7 +220,7 @@ public class Trash : MonoBehaviour
         if (m_alpha >= 0)
         {
             // decrement alpha
-            m_alpha -= 0.01f;
+            m_alpha -= 0.02f;
         }
         else
         {
