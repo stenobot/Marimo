@@ -7,6 +7,9 @@ public class Trash : MonoBehaviour
     /// </summary>
     public bool IsActive;
 
+    /// <summary>
+    /// Tracks if the trash object is static (non-moving) or dynamic
+    /// </summary>
     public bool IsDynamic;
 
     /// <summary>
@@ -55,7 +58,7 @@ public class Trash : MonoBehaviour
         m_trashPartColliders = SmashEffectObj.GetComponentsInChildren<Collider2D>();
 
         m_isTrashActivated = true;
-        m_trashPartsFadeOutTimer = 1f;
+        m_trashPartsFadeOutTimer = 0.8f;
         m_alpha = 1f;
         m_maxAlpha = 1f;
         m_isSmashed = false;
@@ -99,7 +102,8 @@ public class Trash : MonoBehaviour
     {
         if (IsActive && 
             Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
-            col.gameObject.tag != Globals.TAG_CONVEYOR)
+            col.gameObject.tag != Globals.TAG_CONVEYOR && 
+            col.gameObject.tag != Globals.TAG_TRASH_PART)
         {
             // track that we are now smashing
             m_isSmashed = true;
@@ -146,19 +150,16 @@ public class Trash : MonoBehaviour
     /// </summary>
     private void ActivateTrash()
     {
-        if (m_rigidBody != null)
+        if (IsDynamic)
+        {
             m_rigidBody.velocity = Vector2.zero;
-
-        // enable renderer and collider, and remove all constraints
-        m_renderer.enabled = true;
-        m_collider.enabled = true;
-        m_animator.enabled = true;
-
-        if (m_rigidBody != null)
             m_rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
-
-        if (m_animator != null)
+            m_animator.enabled = true;
             m_animator.Play("dispensing_trash", -1, 0f);
+            m_collider.enabled = true;
+        }
+
+        m_renderer.enabled = true;
 
         // set to true so we don't activate again this session
         m_isTrashActivated = true;
@@ -219,7 +220,7 @@ public class Trash : MonoBehaviour
         if (m_alpha >= 0)
         {
             // decrement alpha
-            m_alpha -= 0.01f;
+            m_alpha -= 0.02f;
         }
         else
         {

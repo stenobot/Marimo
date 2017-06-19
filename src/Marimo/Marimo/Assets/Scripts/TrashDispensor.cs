@@ -53,10 +53,13 @@ public class TrashDispensor : MonoBehaviour {
     /// </summary>
     private void InitializeTrashPool()
     {
+        // initialize the list
         m_trash = new List<Trash>();
 
+        // get trash game objects
         GameObject[] objects = GameObject.FindGameObjectsWithTag(Globals.TAG_TRASH);
 
+        // add trash game objects to list
         foreach (GameObject obj in objects)
             m_trash.Add(obj.GetComponent<Trash>());
     }
