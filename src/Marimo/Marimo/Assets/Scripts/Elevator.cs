@@ -35,10 +35,10 @@ public class Elevator : MonoBehaviour
     {
         // Set the rigidbody
         m_rig = GetComponent<Rigidbody2D>();
-        // Set player rigidbody
-        m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
         // Make the rigidbody kinematic so it ignores physics
         m_rig.isKinematic = true;
+        // Set player rigidbody
+        m_playerRig = GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).GetComponent<Rigidbody2D>();
         // Ensure the elevator is at the start height
         transform.localPosition = new Vector2(transform.localPosition.x, StartHeight);
         // Work out which position is on the bottom
