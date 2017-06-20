@@ -42,4 +42,27 @@ static class MathHelper
         else
             return false;
     }
+	
+    /// <summary>
+    /// Snaps the vector's coordinates to the closest pixel
+    /// </summary>
+    /// <param name="pos">The <see cref="Vector2"/> to snap</param>
+    /// <returns>A <see cref="Vector2"/> snapped to the closest pixel</returns>
+    public static Vector2 SnapToPixels(Vector2 pos)
+    {
+        return new Vector2(Mathf.RoundToInt(pos.x * Globals.PIXELS_PER_UNIT), Mathf.Round(pos.y * Globals.PIXELS_PER_UNIT)) / Globals.PIXELS_PER_UNIT;
+    }
+
+    /// <summary>
+    /// Returns the point at the given distance between two <see cref="Vector2"/> positions
+    /// </summary>
+    /// <param name="origin">The start position</param>
+    /// <param name="target">The end position</param>
+    /// <param name="distance">The distance between the positions</param>
+    /// <returns>The point at the given distance between the origin and target</returns>
+    public static Vector2 LerpByDistance(Vector2 origin, Vector2 target, float distance)
+    {
+        Vector2 point = distance * (target - origin).normalized + origin;
+        return point;
+    }
 }
