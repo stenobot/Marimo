@@ -135,7 +135,6 @@ public class SnakeController : ToolBase
     {
         if (m_hasFired)
         {
-            //ExtendOrRetract(true);
             return;
         }
         // Clear the node references
@@ -173,6 +172,7 @@ public class SnakeController : ToolBase
             m_lastNode = node;
         }
 
+        // Engage physics in .3 seconds
         Invoke("ReleaseNodesYConstraints", .3f);
 
         // Trace pixels at snapped positions over the node positions
