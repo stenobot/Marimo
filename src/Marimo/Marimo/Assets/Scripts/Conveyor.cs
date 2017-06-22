@@ -228,7 +228,7 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 		else if (Interaction == Enums.ConveyorInteraction.Speed)
 			Speed = SPEED_HIGH;
 		else if (Interaction == Enums.ConveyorInteraction.Moving)
-			IsMoving = false;
+			IsMoving = true;
 		else if (Interaction == Enums.ConveyorInteraction.Position)
 			m_moveToOffset = true;
 	}
@@ -240,7 +240,7 @@ public class Conveyor : MonoBehaviour, IInteractiveItem
 		else if (Interaction == Enums.ConveyorInteraction.Speed)
 			Speed = SPEED_SLOW;
 		else if (Interaction == Enums.ConveyorInteraction.Moving)
-			IsMoving = true;
+			IsMoving = false;
 		else if (Interaction == Enums.ConveyorInteraction.Position)
 			m_moveToOffset = false;
 	}
