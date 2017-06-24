@@ -22,11 +22,16 @@ public class HintTrigger : MonoBehaviour
     /// </summary>
     public int SpeedPercentageDecreaseToTrigger = 50;
 
+    /// <summary>
+    /// If true, the active tip combination will only be viewed one time in the game
+    /// </summary>
+    public bool ShowOnce = true;
     #endregion
 
     #region  Private variables
 
     private GameObject m_connectedPlayer;
+    private GameManager m_gameManager;
     private Animator m_toolAnimator;
     private Animator m_interationAnimator;
     private Animator m_bubbleAnim;
@@ -35,7 +40,7 @@ public class HintTrigger : MonoBehaviour
     private bool m_hasShownHint;
     private float m_maxSpeed;
     private float m_currentSpeed;
-
+    private string m_hintData;
     #endregion
 
     /// <summary>
@@ -44,29 +49,51 @@ public class HintTrigger : MonoBehaviour
     void Start()
     {
         m_collider = GetComponent<Collider2D>();
+        m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_hasShownHint = false;
         m_maxSpeed = 0;
         m_currentSpeed = 0;
+        m_hintData = string.Format("{0}:{1}", ToolIcon, InteractionIcon);
+        InvokeRepeating("UpdateSlowly", .3f, .3f);
     }
 
     /// <summary>
-    /// Update is called once per frame
+    /// Replaces the standard Update function so it can be called with InvokeRepeating and save precious cycles
     /// </summary>
-    void Update()
+    public void UpdateSlowly()
     {
-        // If a thought bubble can't be shown, hide it
-        if (m_connectedPlayer == null || !m_connectedPlayer.GetComponentInParent<RobotController>().CanShowThoughtBubble)
+        if (m_gameManager.ViewedHints.Contains(m_hintData) && ShowOnce)
         {
-            HideHint();
+            // Don't update any more, this hint will never be seen again
+            CancelInvoke("UpdateSlowly");
+            return;
         }
-        else
+
+        if (!ShowOnce || !m_gameManager.ViewedHints.Contains(m_hintData))
         {
-            // only show the hint if the player expresses interest by slowing down
-            if (IsInterestExpressed())
-                ShowHint();
-            else if (m_hasShownHint)
+            // If a thought bubble can't be shown, hide it
+            if (m_connectedPlayer == null || !m_connectedPlayer.GetComponentInParent<RobotController>().CanShowThoughtBubble)
+            {
                 HideHint();
+            }
+            else
+            {
+                // only show the hint if the player expresses interest by slowing down
+                if (IsInterestExpressed())
+                    ShowHint();
+                else if (m_hasShownHint)
+                    HideHint();
+            }
         }
+    }
+
+    /// <summary>
+    /// Sets the current hint as viewed in the <see cref="GameManager"/>
+    /// Called from the <see cref="Animator"/>
+    /// </summary>
+    public void SetHintViewed()
+    {
+        m_gameManager.ViewHint(ToolIcon, InteractionIcon);
     }
 
     /// <summary>
@@ -110,6 +137,8 @@ public class HintTrigger : MonoBehaviour
                         break;
                 }
                 m_toolAnimator.Play(toolAnimState);
+                // Set the hint viewed in half a second
+                Invoke("SetHintViewed", .5f);
             }
             if ((m_interationAnimator != null) && animStateInfo.IsName(Globals.ANIMSTATE_HINT_IDLE_OPEN) && (animStateInfo.normalizedTime > 1))
             {
@@ -143,8 +172,13 @@ public class HintTrigger : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Hides the hint and withdraws the thought bubble
+    /// </summary>
     private void HideHint()
     {
+        // Don't mark the hint viewed if the timeout hasn't expired yet
+        CancelInvoke("SetHintViewed");
         if (m_hasShownHint && m_bubbleAnim != null)
         {
             AnimatorStateInfo animStateInfo = m_bubbleAnim.GetCurrentAnimatorStateInfo(0);

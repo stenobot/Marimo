@@ -5,18 +5,28 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
-    // The UI Text object with the Game Over text
+    /// <summary>
+    /// The UI Text object with the Game Over text
+    /// </summary>
     public GameObject GameOverTextObject;
 
-    // Use this for initialization
+    /// <summary>
+    /// Allows or suppresses the hint system according to a user option
+    /// TODO: Add user options menu to control this (Issue #66 \m/)
+    /// </summary>
+    public bool HintsEnabled = true;
+
+    /// <summary>
+    /// Contains the set of hints which have already been viewed
+    /// </summary>
+    public HashSet<string> ViewedHints { get; private set; }
+
+    /// <summary>
+    /// Use this for initialization
+    /// </summary>
     void Start () {
-        
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        ViewedHints = new HashSet<string>();
+    }
 
     /// <summary>
     /// Shows the game over screen
@@ -51,5 +61,17 @@ public class GameManager : MonoBehaviour {
     public void Pause()
     {
         Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+    }
+
+    /// <summary>
+    /// Marks the hint as viewed so it can be suppressed on a second view
+    /// </summary>
+    /// <param name="tool">The <see cref="Enums.ToolIcon"/> active on the <see cref="HintTrigger"/></param>
+    /// <param name="interaction">The <see cref="Enums.InteractionIcon"/> active on the <see cref="HintTrigger"</param>
+    public void ViewHint(Enums.ToolIcon tool, Enums.InteractionIcon interaction)
+    {
+        string val = string.Format("{0}:{1}", tool, interaction);
+        if (!ViewedHints.Contains(val))
+            ViewedHints.Add(val);
     }
 }
