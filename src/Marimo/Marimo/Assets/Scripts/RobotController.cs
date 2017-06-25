@@ -439,11 +439,13 @@ public class RobotController : MonoBehaviour
     {
         // Only trigger if the player isn't already dead  
         // and the impact velocity exceeds the maximum impact velocity
-        // or the player collides with trash. 
+        // or the player collides with trash or bomb blast
         // TODO: proper impact collision system with destructive game objects
         if (!IsDead && 
             (col.relativeVelocity.y > MaximumImpactVelocity ||
-            col.gameObject.tag == Globals.TAG_TRASH))
+            col.gameObject.tag == Globals.TAG_TRASH ||
+            (col.gameObject.tag == Globals.TAG_BOMB && 
+            col.collider.GetType() == typeof(CapsuleCollider2D))))
         {
             // Stop the player's rigidbody from moving any further
             m_rigidBody.isKinematic = true;

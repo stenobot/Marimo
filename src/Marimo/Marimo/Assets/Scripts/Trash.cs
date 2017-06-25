@@ -8,12 +8,13 @@ public class Trash : MonoBehaviour
     public bool IsActive;
 
     /// <summary>
-    /// Tracks if the trash object is static (non-moving) or dynamic
+    /// Tracks if the trash object is static (non-moving) or 
+    /// dynamic (can move around, such as on a conveyor)
     /// </summary>
     public bool IsDynamic;
 
     /// <summary>
-    /// The object containing the trash smash effect
+    /// The object containing the smash effect
     /// </summary>
     public GameObject SmashEffectObj;
 
@@ -41,8 +42,7 @@ public class Trash : MonoBehaviour
     void Start()
     {
         SmashEffectObj.SetActive(true);
-
-        
+       
         m_collider = GetComponent<Collider2D>();
         m_renderer = GetComponent<SpriteRenderer>();
 
@@ -52,7 +52,6 @@ public class Trash : MonoBehaviour
             m_animator = GetComponent<Animator>();
         }
         
-
         m_trashPartRigs = SmashEffectObj.GetComponentsInChildren<Rigidbody2D>();
         m_trashPartRenderers = SmashEffectObj.GetComponentsInChildren<SpriteRenderer>();
         m_trashPartColliders = SmashEffectObj.GetComponentsInChildren<Collider2D>();
@@ -100,10 +99,15 @@ public class Trash : MonoBehaviour
     /// <param name="col">The collision object</param>
     void OnCollisionEnter2D(Collision2D col)
     {
+        // trash item must be active
+        // velocity breaks trash object unless its colliding with conveyor (or its own parts)
+        // collision with bomb always breaks trash object
         if (IsActive && 
-            Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
+            (Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
             col.gameObject.tag != Globals.TAG_CONVEYOR && 
-            col.gameObject.tag != Globals.TAG_TRASH_PART)
+            col.gameObject.tag != Globals.TAG_TRASH_PART) ||
+            (col.gameObject.tag == Globals.TAG_BOMB &&
+            col.collider.GetType() == typeof(CapsuleCollider2D)))
         {
             // track that we are now smashing
             m_isSmashed = true;
