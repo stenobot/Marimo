@@ -24,6 +24,11 @@ public class Bomb : MonoBehaviour
     /// </summary>
     public Sprite DiagLeftSprite;
 
+    /// <summary>
+    /// Holds a Prefab of the bomb object, which we'll use to respawn after explosion
+    /// </summary>
+    public GameObject BombPrefab;
+
     #endregion
 
     #region Private Variables
@@ -32,7 +37,7 @@ public class Bomb : MonoBehaviour
     private Rigidbody2D m_rigidBody;
     private Animator m_anim;
     private SpriteRenderer m_renderer;
-    private CapsuleCollider2D m_collider;
+    private CapsuleCollider2D m_blastCollider;
 
     // tracks whether bomb is tipped diagonally right 
     private bool m_isOnRightDiagSlope = false;
@@ -50,10 +55,10 @@ public class Bomb : MonoBehaviour
     void Start()
     {
         // get components
-        m_rigidBody = gameObject.GetComponent<Rigidbody2D>();
-        m_anim = gameObject.GetComponent<Animator>();
-        m_renderer = gameObject.GetComponent<SpriteRenderer>();
-        m_collider = gameObject.GetComponent<CapsuleCollider2D>();
+        m_rigidBody = GetComponent<Rigidbody2D>();
+        m_anim = GetComponent<Animator>();
+        m_renderer = GetComponent<SpriteRenderer>();
+        m_blastCollider = GetComponent<CapsuleCollider2D>();
 
         // keep track of bomb's starting position for respawn
         m_startingPosition = gameObject.transform.position;
@@ -75,13 +80,13 @@ public class Bomb : MonoBehaviour
     /// </summary>
     private void Explode()
     {
-        gameObject.transform.position = new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 0.3f);
+        transform.position = new Vector2(gameObject.transform.position.x, gameObject.transform.position.y - 0.3f);
         m_rigidBody.constraints = RigidbodyConstraints2D.FreezeAll;
 
-        // respawn bomb object in original position 
-        Instantiate(gameObject, m_startingPosition, Quaternion.identity);
+        // respawn bomb prefab in original position 
+        Instantiate(BombPrefab, m_startingPosition, Quaternion.identity);
 
-        m_collider.enabled = true;
+        m_blastCollider.enabled = true;
         m_anim.enabled = true;
 
         Destroy(gameObject, 1.5f);

@@ -105,6 +105,7 @@ public class Trash : MonoBehaviour
         if (IsActive && 
             (Mathf.Abs(col.relativeVelocity.y) > m_maxImpactVelocity && 
             col.gameObject.tag != Globals.TAG_CONVEYOR && 
+            col.gameObject.tag != Globals.TAG_PLAYER &&
             col.gameObject.tag != Globals.TAG_TRASH_PART) ||
             (col.gameObject.tag == Globals.TAG_BOMB &&
             col.collider.GetType() == typeof(CapsuleCollider2D)))
