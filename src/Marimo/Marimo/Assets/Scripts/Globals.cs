@@ -45,6 +45,7 @@ public class Globals
 	public const string TAG_TRASH = "Trash";
     public const string TAG_TRASH_PART = "TrashPart";
     public const string TAG_CONVEYOR = "Conveyor";
+    public const string TAG_BOMB = "Bomb";
 	
 	// Global values
     public const float PIXELS_PER_UNIT = 6f;
