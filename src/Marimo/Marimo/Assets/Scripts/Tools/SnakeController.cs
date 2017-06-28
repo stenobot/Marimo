@@ -36,8 +36,6 @@ public class SnakeController : ToolBase
     private List<Vector2> m_pixelPositions;
     // Tracks the last node that was iterated on to permit attached hinge joints
     private GameObject m_lastNode;
-    // The color of the prior pixel, used to toggle between EvenPixelColor and OddPixelColor
-    private Color m_lastPixelColor;
     // Holds a reference to the player object's robot controller script
     private RobotController m_player;
     // Holds a reference to the player's rigidbody
@@ -279,7 +277,6 @@ public class SnakeController : ToolBase
                 (startPos.x > endPos.x ? true : false) :
                 (startPos.x < endPos.x ? true : false);
 
-            float distance = Vector2.Distance(startPos, endPos);
             Vector2 currentpos = startPos;
             while (currentpos != endPos)
             {

@@ -31,15 +31,20 @@ public class Globals
     // Axes for input
     public const string INPUT_AXIS_HORIZONTAL = "Horizontal";
     public const string INPUT_AXIS_VERTICAL = "Vertical";
+
     // Buttons for input
     public const string INPUT_BUTTON_JUMP = "Jump";
+    public const string INPUT_BUTTON_FIRE0 = "Fire0";
     public const string INPUT_BUTTON_FIRE1 = "Fire1";
     public const string INPUT_BUTTON_FIRE2 = "Fire2";
     public const string INPUT_BUTTON_FIRE3 = "Fire3";
+    public const string INPUT_BUTTON_SELECT = "Select";
+    public const string INPUT_BUTTON_START = "Start";
 
     // Tags
     public const string TAG_GAMEMANAGER = "GameManager";
     public const string TAG_PLAYER = "Player";
+    public const string TAG_MUCKLE = "Muckle";
     public const string TAG_GROUND = "Ground";
     public const string TAG_TREADS = "Treads";
 	public const string TAG_TRASH = "Trash";
