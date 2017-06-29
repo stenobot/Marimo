@@ -19,13 +19,10 @@ public class FollowTarget : MonoBehaviour {
     /// </summary>
     public float MinYPosition = 0f;
 
-    /// <summary>
-    /// LateUpdate is called after all Update functions have been called.
-    /// It needs to be used for follow cam because they track objects which may have moved during the other Update functions.
-    /// </summary>
-    void LateUpdate () {
-        MoveCam();
-    }
+	// Use this for initialization
+	void Start () {
+        InvokeRepeating("MoveCam", 0, 0.001f);
+	}
 
     /// <summary>
     /// Smoothly moves the camera toward the target's position
