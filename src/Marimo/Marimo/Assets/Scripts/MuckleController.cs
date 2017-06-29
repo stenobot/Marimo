@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public class MuckleController : RigidBodyBehavior
 {
-    #region Public editor varaibles
+    #region Public editor variables
 
     /// <summary>
     /// The maximum movement speed for the character
@@ -23,7 +23,7 @@ public class MuckleController : RigidBodyBehavior
     /// <summary>
     /// The maximum speed increase for the character's boost function
     /// </summary>
-    public float BoostSpeed = 3f;
+    public float MaxBoostSpeed = 3f;
 
     /// <summary>
     /// The force to apply to the character's boost
@@ -51,8 +51,8 @@ public class MuckleController : RigidBodyBehavior
     private bool m_canControl = false;
     // Tracks if the player's boost mode is active
     private bool m_boostMode = false;
-    // Tracks the current boost speed to apply (to permit deceleration)
-    private float m_boostSpeed;
+    // Tracks the current maximum boost speed to apply (to permit deceleration)
+    private float m_maxBoostSpeed;
 
     #endregion
 
@@ -65,7 +65,7 @@ public class MuckleController : RigidBodyBehavior
         m_anim = GetComponentInChildren<Animator>();
         m_audio = GetComponentInChildren<AudioSource>();
         m_rigidBody = GetComponent<Rigidbody2D>();
-        m_boostSpeed = BoostSpeed;
+        m_maxBoostSpeed = MaxBoostSpeed;
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class MuckleController : RigidBodyBehavior
     /// </summary>
     private void DecreaseBoost()
     {
-        m_boostSpeed -= (BoostSpeed / (BoostDuration * 60));
+        m_maxBoostSpeed -= (MaxBoostSpeed / (BoostDuration * 60));
     }
 
     /// <summary>
@@ -145,8 +145,8 @@ public class MuckleController : RigidBodyBehavior
 
         // Calculate the real max speed by adding the current boost speed to MaxSpeed
         Vector2 trueMaxSpeed = new Vector2(
-            MaxSpeed + ((m_boostMode) ? m_boostSpeed : 0),
-            MaxSpeed + ((m_boostMode) ? m_boostSpeed : 0));
+            MaxSpeed + ((m_boostMode) ? m_maxBoostSpeed : 0),
+            MaxSpeed + ((m_boostMode) ? m_maxBoostSpeed : 0));
 
         // Apply the force modifier
         AddConstantForce(gameObject, new Vector2(xAxisInput * MoveForce, yAxisInput * MoveForce), trueMaxSpeed);
@@ -160,7 +160,7 @@ public class MuckleController : RigidBodyBehavior
         // Don't disable boost mode after the previous duration expires
         CancelInvoke("DisableBoost");
         m_boostMode = true;
-        m_boostSpeed = BoostSpeed;
+        m_maxBoostSpeed = MaxBoostSpeed;
         // Disable boost mode after the boost duration expires
         Invoke("DisableBoost", BoostDuration);
     }
@@ -171,6 +171,6 @@ public class MuckleController : RigidBodyBehavior
     public void DisableBoost()
     {
         m_boostMode = false;
-        m_boostSpeed = 0;
+        m_maxBoostSpeed = 0;
     }
 }
