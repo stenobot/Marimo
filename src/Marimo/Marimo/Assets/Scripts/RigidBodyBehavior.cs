@@ -89,8 +89,8 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
     /// </summary>
     private void ApplyForce()
     {
-        // Initialize m_totalForce to gravity * gravity scale, as gravity also needs to be factored into the total force and speed calculations
-        m_totalForce = Physics2D.gravity * m_rig.gravityScale;
+        // Initialize m_totalForce to gravity * drag * gravity scale, as gravity also needs to be factored into the total force and speed calculations
+        m_totalForce = Physics2D.gravity * m_rig.drag * m_rig.gravityScale;
         // Initialize max speed
         m_maxSpeed = Vector2.zero;
 
