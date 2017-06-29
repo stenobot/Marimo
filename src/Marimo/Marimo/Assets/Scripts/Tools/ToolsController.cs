@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Controls selection of tools on the robot
+/// </summary>
 public class ToolsController : MonoBehaviour
 {
     /// Holds the tool references
@@ -11,6 +12,8 @@ public class ToolsController : MonoBehaviour
     private IToolBase m_activeTool;
     // Tracks if the tool is ready to be cycled
     private bool m_canCycleTools;
+    // Tracks if the tool controller is enabled
+    private bool m_isEnabled = true;
 
     /// <summary>
     /// Used for initialization
@@ -50,6 +53,9 @@ public class ToolsController : MonoBehaviour
     /// </summary>
     void Update()
     {
+        if (!m_isEnabled)
+            return;
+
         // Fire 3: Cycle between tools (Left Shift, MMB, 'X' button on Xbox 360)
         if (Input.GetButtonDown(Globals.INPUT_BUTTON_FIRE3))
             CycleTools();
@@ -90,5 +96,26 @@ public class ToolsController : MonoBehaviour
             m_activeTool.GameObject.SetActive(true);
             m_activeTool.Enable();
         }
+    }
+
+    /// <summary>
+    /// Enables tool selection
+    /// </summary>
+    public void EnableTools()
+    {
+        m_isEnabled = true;
+    }
+
+    /// <summary>
+    /// Disables tool selection and retracts any active tool
+    /// </summary>
+    public void DisableTools()
+    {
+        if (m_activeTool != null)
+        {
+            m_activeTool.Disable();
+            m_activeTool = null;
+        }
+        m_isEnabled = false;
     }
 }

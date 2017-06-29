@@ -16,6 +16,9 @@ public class Enums
         None
     }
 
+    /// <summary>
+    /// Icons for tools which appears in a <see cref="HintTrigger"/>
+    /// </summary>
     public enum ToolIcon
     {
         None,
@@ -23,6 +26,9 @@ public class Enums
         UpDownArrows
     }
 
+    /// <summary>
+    /// Icons for interactions which appears in a <see cref="HintTrigger"/>
+    /// </summary>
     public enum InteractionIcon
     {
         None,
@@ -30,6 +36,9 @@ public class Enums
         Elevator
     }
 
+    /// <summary>
+    /// Types of interactions which can be taken on a <see cref="Conveyor"/> by a <see cref="InteractiveItemController"/>
+    /// </summary>
 	public enum ConveyorInteraction
 	{
 		Direction,
@@ -38,4 +47,13 @@ public class Enums
 		Moving,
 		None
 	}
+
+    /// <summary>
+    /// Contains the various types of playable character
+    /// </summary>
+    public enum PlayableCharacter
+    {
+        Robot,
+        Muckle
+    }
 }

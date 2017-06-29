@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Triggers a hint in the player's thought bubble when it enters the trigger area
+/// Triggers a hint in the player's thought bubble when it enters the hint's trigger area
 /// </summary>
 public class HintTrigger : MonoBehaviour
 {
@@ -23,24 +23,34 @@ public class HintTrigger : MonoBehaviour
     public int SpeedPercentageDecreaseToTrigger = 50;
 
     /// <summary>
-    /// If true, the active tip combination will only be viewed one time in the game
+    /// If true, this combination of <see cref="ToolIcon"/> and <see cref="InteractionIcon"/> will only be viewed one time in the game
     /// </summary>
     public bool ShowOnce = true;
+
     #endregion
 
     #region  Private variables
-
+    // Reference to the player which has entered the hint's trigger area
     private GameObject m_connectedPlayer;
+    // Reference to the game manager
     private GameManager m_gameManager;
+    // Reference to the animator for the ToolIcon
     private Animator m_toolAnimator;
+    // Reference to the animator for the InteractionIcon
     private Animator m_interationAnimator;
+    // Reference to the animator for the thought bubble
     private Animator m_bubbleAnim;
+    // Reference to the player's RigidBody2D
     private Rigidbody2D m_playerRig;
-    private Collider2D m_collider;
+    // Tracks if the hint has been shown
     private bool m_hasShownHint;
+    // Tracks the maximum speed the player has travelled whilst in the hint's trigger area
     private float m_maxSpeed;
+    // Tracks the player's current speed in the hint's trigger area
     private float m_currentSpeed;
+    // Used to form the hint data which is used to check if the hint has already been viewed
     private string m_hintData;
+
     #endregion
 
     /// <summary>
@@ -48,7 +58,6 @@ public class HintTrigger : MonoBehaviour
     /// </summary>
     void Start()
     {
-        m_collider = GetComponent<Collider2D>();
         m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_hasShownHint = false;
         m_maxSpeed = 0;
@@ -78,7 +87,7 @@ public class HintTrigger : MonoBehaviour
             }
             else
             {
-                // only show the hint if the player expresses interest by slowing down
+                // Only show the hint if the player expresses interest by slowing down
                 if (IsInterestExpressed())
                     ShowHint();
                 else if (m_hasShownHint)

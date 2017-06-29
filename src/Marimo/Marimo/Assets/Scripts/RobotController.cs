@@ -62,6 +62,7 @@ public class RobotController : MonoBehaviour
     private Collider2D m_treadCollider;
 
     // Misc
+    private bool m_canControl = false;
     private bool m_isGrounded = true;
     private bool m_isMoving = false;
     private bool m_isOnDownwardSlope = false;
@@ -88,9 +89,34 @@ public class RobotController : MonoBehaviour
         InvokeRepeating("HasFallen", 1, 1);
     }
 
+    /// <summary>
+    /// Determines if the user can control the character
+    /// </summary>
+    /// <param name="value">If true, the user can control the character</param>
+    public void CanControl(bool value)
+    {
+        m_canControl = value;
+        if (m_canControl)
+        {
+            m_audio.enabled = true;
+            Animator_Treads.enabled = true;
+            Camera.main.GetComponent<FollowTarget>().Target = transform;
+            GetComponentInChildren<ToolsController>().EnableTools();
+        }
+        else
+        {
+            m_audio.enabled = false;
+            Animator_Treads.Play(Globals.ANIMSTATE_IDLE);
+            GetComponentInChildren<ToolsController>().DisableTools();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
+        if (!m_canControl)
+            return;
+
         m_hasMovedForFrame = false;
         if (!IsDead)
         {
