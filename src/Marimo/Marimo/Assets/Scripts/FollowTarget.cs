@@ -15,14 +15,22 @@ public class FollowTarget : MonoBehaviour {
     public float SmoothTime = 0.1f;
 
     /// <summary>
+    /// The maximum speed the camera can move
+    /// </summary>
+    public float MaxSpeed = 25f;
+
+    /// <summary>
     /// The lowest Y position the camera can reach before it stops following the target
     /// </summary>
     public float MinYPosition = 0f;
 
-	// Use this for initialization
-	void Start () {
-        InvokeRepeating("MoveCam", 0, 0.001f);
-	}
+    /// <summary>
+    /// LateUpdate should be used for camera functions like this as the objects can move during Update() and LateUpdate() fires last
+    /// </summary>
+    private void LateUpdate()
+    {
+        MoveCam();
+    }
 
     /// <summary>
     /// Smoothly moves the camera toward the target's position
@@ -32,7 +40,7 @@ public class FollowTarget : MonoBehaviour {
         // Dummy speed value to pass to SmoothDamp method below
         Vector2 currentSpeed = Vector2.zero;
         // Calculate the camera position for the next frame. A Vector3 is used so the camera's Z position won't be altered
-        Vector3 newPos = Vector2.SmoothDamp(transform.position, Target.position, ref currentSpeed, SmoothTime, 10f, 0.1f);
+        Vector3 newPos = Vector2.SmoothDamp(transform.position, Target.position, ref currentSpeed, SmoothTime, MaxSpeed, 0.1f);
         // Set the Z position back to its original position
         newPos.z = transform.position.z;
         // Don't set the camera position if the player has fallen off screen
