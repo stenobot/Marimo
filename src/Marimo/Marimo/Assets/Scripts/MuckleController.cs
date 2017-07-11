@@ -104,7 +104,9 @@ public class MuckleController : RigidBodyBehavior
         {
             m_audio.enabled = true;
             m_anim.enabled = true;
-            Camera.main.GetComponent<FollowTarget>().Target = transform;
+            FollowTarget followTgt = Camera.main.GetComponent<FollowTarget>();
+            if (followTgt != null)
+                followTgt.Target = transform;
         }
         else
         {
