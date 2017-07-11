@@ -4,14 +4,16 @@ using UnityEngine;
 /// <summary>
 /// Character controller script for the robot
 /// </summary>
-public class RobotController : MonoBehaviour
+public class RobotController : RigidBodyBehavior
 {
     // The force to apply to the player each frame while moving
     public float MoveForce = 16f;
-    // The force to apply to the player while jumping
-    public float JumpForce = 800f;
     // The player's maximum speed
     public float MaxSpeed = 14f;
+    // The force to apply to the player while jumping
+    public float JumpForce = 800f;
+    // The player's maximum jump speed
+    public float MaxJumpSpeed = 14f;
     // If the player makes impact at a greater velocity than the maximum it will be destroyed
     public float MaximumImpactVelocity = 30f;
     // The smash effect gameobject to enable when the player is smashed
@@ -74,9 +76,12 @@ public class RobotController : MonoBehaviour
     private Elevator m_elevator;
     private Conveyor m_conveyor;
 
-    // Use this for initialization
-    void Start()
+    /// <summary>
+    /// Use this for initialization
+    /// </summary>
+    protected override void Start()
     {
+        base.Start();
         // Set the game manager reference
         m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         // Set the rigidbody reference
@@ -87,6 +92,25 @@ public class RobotController : MonoBehaviour
         IsDead = false;
         // Call invoke once per second to test if robot fell off screen
         InvokeRepeating("HasFallen", 1, 1);
+    }
+
+    /// <summary>
+    /// Update is called once per frame
+    /// </summary>
+    protected override void Update()
+    {
+        base.Update();
+        if (!m_canControl)
+            return;
+
+        m_hasMovedForFrame = false;
+        if (!IsDead)
+        {
+            // Get the tread collider reference
+            SetTreadCollider();
+            // Process input
+            HandleInput();
+        }
     }
 
     /// <summary>
@@ -108,22 +132,6 @@ public class RobotController : MonoBehaviour
             m_audio.enabled = false;
             Animator_Treads.Play(Globals.ANIMSTATE_IDLE);
             GetComponentInChildren<ToolsController>().DisableTools();
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (!m_canControl)
-            return;
-
-        m_hasMovedForFrame = false;
-        if (!IsDead)
-        {
-            // Get the tread collider reference
-            SetTreadCollider();
-            // Process input
-            HandleInput();
         }
     }
 
@@ -160,6 +168,10 @@ public class RobotController : MonoBehaviour
         float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
         float yAxisInput = Input.GetAxis(Globals.INPUT_AXIS_VERTICAL);
 
+        // Update the input values to ignore insignificant numbers (my 360 controller seems to stick around -.02f occasionally and it messes with the force system by inflating max speed)
+        xAxisInput = (xAxisInput >= 0.05f | xAxisInput <= -0.5f) ? xAxisInput : 0;
+        yAxisInput = (yAxisInput >= 0.05f | yAxisInput <= -0.5f) ? yAxisInput : 0;
+
         // Check if the Jump button is pressed
         bool tryJump = Input.GetButtonDown(Globals.INPUT_BUTTON_JUMP);
 
@@ -178,6 +190,10 @@ public class RobotController : MonoBehaviour
         // Only allow jumping while grounded
         if (tryJump)
             Jump();
+
+        // If the X and Y axis are both zero, remove the constant force applied
+        if (xAxisInput == 0 && yAxisInput == 0)
+            RemoveConstantForce(gameObject);
 
         // Set animation state, speed, and audio pitch
         SetAnimationStates();
@@ -337,7 +353,7 @@ public class RobotController : MonoBehaviour
             Animator_ThoughtBubble.transform.localScale = new Vector3(scale, 1);
 
             // Add force to the player
-            m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput);
+            AddConstantForce(gameObject, Vector2.right * MoveForce * xAxisInput, new Vector2(MaxSpeed, MaxJumpSpeed));
             // The player has completed their movement action for this frame
             m_hasMovedForFrame = true;
         }
@@ -467,10 +483,10 @@ public class RobotController : MonoBehaviour
         // and the impact velocity exceeds the maximum impact velocity
         // or the player collides with trash or bomb blast
         // TODO: proper impact collision system with destructive game objects
-        if (!IsDead && 
+        if (!IsDead &&
             (col.relativeVelocity.y > MaximumImpactVelocity ||
             col.gameObject.tag == Globals.TAG_TRASH ||
-            (col.gameObject.tag == Globals.TAG_BOMB && 
+            (col.gameObject.tag == Globals.TAG_BOMB &&
             col.collider.GetType() == typeof(CapsuleCollider2D))))
         {
             // Stop the player's rigidbody from moving any further
