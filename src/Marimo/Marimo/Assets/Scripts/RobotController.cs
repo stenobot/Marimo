@@ -100,8 +100,13 @@ public class RobotController : RigidBodyBehavior
     protected override void Update()
     {
         base.Update();
-        if (!m_canControl)
+        if (!m_canControl || m_gameManager.IsPaused)
+        {
+            m_audio.volume = 0;
             return;
+        }
+
+        m_audio.volume = 1;
 
         m_hasMovedForFrame = false;
         if (!IsDead)

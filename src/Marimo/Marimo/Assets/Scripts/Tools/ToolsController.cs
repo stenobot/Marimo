@@ -6,6 +6,8 @@ using UnityEngine;
 /// </summary>
 public class ToolsController : MonoBehaviour
 {
+    // Reference to game manager
+    private GameManager m_gameManager;
     /// Holds the tool references
     private List<IToolBase> m_tools;
     // Holds a reference to the active tool
@@ -14,12 +16,13 @@ public class ToolsController : MonoBehaviour
     private bool m_canCycleTools;
     // Tracks if the tool controller is enabled
     private bool m_isEnabled = true;
-
+    
     /// <summary>
     /// Used for initialization
     /// </summary>
 	void Start()
     {
+        m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         LoadTools();
         m_canCycleTools = true;
     }
@@ -53,7 +56,7 @@ public class ToolsController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (!m_isEnabled)
+        if (!m_isEnabled || m_gameManager.IsPaused)
             return;
 
         // Fire 3: Cycle between tools (Left Shift, MMB, 'X' button on Xbox 360)

@@ -42,6 +42,7 @@ public class MuckleController : RigidBodyBehavior
     private Animator m_anim;
     private AudioSource m_audio;
     private Rigidbody2D m_rigidBody;
+    private GameManager m_gameManager;
 
     #endregion
 
@@ -62,6 +63,7 @@ public class MuckleController : RigidBodyBehavior
     protected override void Start()
     {
         base.Start();
+        m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_anim = GetComponentInChildren<Animator>();
         m_audio = GetComponentInChildren<AudioSource>();
         m_rigidBody = GetComponent<Rigidbody2D>();
@@ -75,7 +77,7 @@ public class MuckleController : RigidBodyBehavior
     {
         base.Update();
 
-        if (!m_canControl)
+        if (!m_canControl || m_gameManager.IsPaused)
             return;
         // Process input
         HandleInput();

@@ -87,7 +87,8 @@ public class WrenchController : ToolBase
         {
             IsEnabled = m_isConnected ? true : IsEnabled;
             // Play the idle animation state
-            m_anim.Play(Globals.ANIMSTATE_IDLE, 0, 0);
+            if(m_anim.gameObject.activeSelf)
+                m_anim.Play(Globals.ANIMSTATE_IDLE, 0, 0);
             // Disconnect any connected item
             DisconnectItem();
         }

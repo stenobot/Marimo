@@ -48,6 +48,8 @@ public class SnakeController : ToolBase
     private DistanceJoint2D m_grappleHinge;
     // Tracks the offset from the grapple object where the hit occurred
     private Vector2 m_grappleOffset;
+    // Holds a reference to the game manager
+    private GameManager m_gameMgr;
 
     /// <summary>
     /// Used for initialization. Using Awake() instead of Start() so it fires each time the object is re-enabled.
@@ -56,6 +58,7 @@ public class SnakeController : ToolBase
     {
         base.Awake();
         m_hasFired = false;
+        m_gameMgr = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_nodes = new List<GameObject>();
         m_pixels = new List<GameObject>();
         m_pixelPositions = new List<Vector2>();
@@ -72,12 +75,12 @@ public class SnakeController : ToolBase
     {
         base.Update();
 
-        if (!m_player.IsDead && IsFire1Pressed && !m_isRetracting && transform.localPosition.x >= RestingPosX)
+        if (!m_player.IsDead && !m_gameMgr.IsPaused && IsFire1Pressed && !m_isRetracting && transform.localPosition.x >= RestingPosX)
         {
             // Fire or continue firing
             ActivateTool();
         }
-        else
+        else if (!m_gameMgr.IsPaused)
         {
             DeactivateTool();
         }
@@ -132,9 +135,8 @@ public class SnakeController : ToolBase
     private void ActivateTool()
     {
         if (m_hasFired)
-        {
             return;
-        }
+
         // Clear the node references
         ClearNodes();
 

@@ -84,6 +84,8 @@ public abstract class ToolBase : MonoBehaviour, IToolBase
 
     // Holds a reference to the attached AudioSource
     private AudioSource m_audio;
+    // Holds a reference to the game manager
+    private GameManager m_gameManager;
     // Tracks if the tool has extended during this frame
     private bool m_hasExtendedThisFrame;
     // Tracks if the tool has retracted during this frame
@@ -151,6 +153,7 @@ public abstract class ToolBase : MonoBehaviour, IToolBase
     /// </summary>
     public virtual void Awake()
     {
+        m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_audio = GetComponent<AudioSource>();
         IsEnabled = false;
         IsRetracting = false;
@@ -169,6 +172,9 @@ public abstract class ToolBase : MonoBehaviour, IToolBase
     /// </summary>
     public virtual void Update()
     {
+        if (m_gameManager.IsPaused)
+            return;
+
         m_hasExtendedThisFrame = false;
         m_hasRetractedThisFrame = false;
 
@@ -187,7 +193,7 @@ public abstract class ToolBase : MonoBehaviour, IToolBase
         // Fire 1 released: The tool will retract to the resting position
         IsFire1Released = Input.GetButtonUp(Globals.INPUT_BUTTON_FIRE1);
 
-        if (IsFire1Released)
+        if (IsFire1Released || (!IsFire1Released && !Input.GetButton(Globals.INPUT_BUTTON_FIRE1)))
             IsFire1Pressed = false;
         else
             // Fire 1 pressed: Extend/activate the tool

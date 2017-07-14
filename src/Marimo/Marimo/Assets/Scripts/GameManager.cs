@@ -40,6 +40,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public MuckleController Muckle { get; private set; }
 
+    /// <summary>
+    /// Holds the pause state
+    /// </summary>
+    public bool IsPaused { get; private set; }
     #endregion
 
     #region Private variables
@@ -79,7 +83,7 @@ public class GameManager : MonoBehaviour
     private void HandleInput()
     {
         // Switch player
-        if (Input.GetButtonDown(Globals.INPUT_BUTTON_SELECT))
+        if (!IsPaused && Input.GetButtonDown(Globals.INPUT_BUTTON_SELECT))
         {
             m_activeCharacter = m_activeCharacter == Enums.PlayableCharacter.Robot ? Enums.PlayableCharacter.Muckle : Enums.PlayableCharacter.Robot;
             if (m_activeCharacter == Enums.PlayableCharacter.Robot)
@@ -168,6 +172,7 @@ public class GameManager : MonoBehaviour
     public void Pause()
     {
         Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+        IsPaused = !IsPaused;
     }
 
     /// <summary>
