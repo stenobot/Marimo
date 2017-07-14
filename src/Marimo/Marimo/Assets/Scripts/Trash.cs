@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Trash : MonoBehaviour
+public class Trash : RigidBodyBehavior
 {
     /// <summary>
     /// Tracks if the trash is active or deactivated
@@ -39,8 +39,9 @@ public class Trash : MonoBehaviour
     private float m_maxImpactVelocity;
 
     // object initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         SmashEffectObj.SetActive(true);
        
         m_collider = GetComponent<Collider2D>();
@@ -73,8 +74,9 @@ public class Trash : MonoBehaviour
     }
 	
 	// object update once per frame
-	void Update()
+	protected override void Update()
     {
+        base.Update();
         if (IsActive)
         {
             // check if trash has not been activated, 
