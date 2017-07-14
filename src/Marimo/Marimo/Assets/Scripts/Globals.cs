@@ -41,6 +41,9 @@ public class Globals
     public const string INPUT_BUTTON_SELECT = "Select";
     public const string INPUT_BUTTON_START = "Start";
 
+    // Sorting layers
+    public const string SORTING_LAYER_PIPES = "Pipes";
+
     // Tags
     public const string TAG_GAMEMANAGER = "GameManager";
     public const string TAG_PLAYER = "Player";
@@ -52,7 +55,8 @@ public class Globals
     public const string TAG_CONVEYOR = "Conveyor";
     public const string TAG_BOMB = "Bomb";
     public const string TAG_LEAF = "Leaf";
-	
+    public const string TAG_PIPES = "Pipes";
+
 	// Global values
     public const float PIXELS_PER_UNIT = 6f;
     public const float PIXEL_SIZE = 1f / PIXELS_PER_UNIT;

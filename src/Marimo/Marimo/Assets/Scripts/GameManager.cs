@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -67,6 +69,16 @@ public class GameManager : MonoBehaviour
         ViewedHints = new HashSet<string>();
         // Default to selecting the robot as the playable character
         SelectRobot();
+        // Set programmatic sorting layers to meshes
+        SetMeshSortingLayers();
+    }
+
+    private void SetMeshSortingLayers()
+    {
+        // Set sorting layer on all pipes
+        List<GameObject> pipes = GameObject.FindGameObjectsWithTag(Globals.TAG_PIPES).ToList();
+        foreach (GameObject pipe in pipes)
+            pipe.GetComponent<Renderer>().sortingLayerName = Globals.SORTING_LAYER_PIPES;
     }
 
     /// <summary>
