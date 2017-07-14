@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Bomb : MonoBehaviour
+public class Bomb : RigidBodyBehavior
 {
     #region Public Variables
 
@@ -52,8 +52,9 @@ public class Bomb : MonoBehaviour
 
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         // get components
         m_rigidBody = GetComponent<Rigidbody2D>();
         m_anim = GetComponent<Animator>();
@@ -68,8 +69,9 @@ public class Bomb : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         CheckIfSloped();
 	}
 

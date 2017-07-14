@@ -29,7 +29,8 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
     /// </summary>
     protected virtual void Update()
     {
-        ApplyForce();
+        if (m_rig != null)
+            ApplyForce();
     }
 
     /// <summary>
@@ -104,8 +105,10 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
         // Apply the total force to the rigidbody
         m_rig.AddForce(m_totalForce);
 
-        // The minimum speed should use the inverse of the absolute value of m_maxSpeed's axes to permit movement in either direction
-        Vector2 minSpeed = new Vector2(-Mathf.Abs(m_maxSpeed.x), -Mathf.Abs(m_maxSpeed.y));
+        // The minimum speed should use the inverse of the absolute value of m_maxSpeed's X axis to permit movement in both directions
+        // Allow infinite downward speed for gravity (except for Muckle)
+        Vector2 minSpeed = new Vector2(-Mathf.Abs(m_maxSpeed.x),
+            (tag == Globals.TAG_MUCKLE ? -Mathf.Abs(m_maxSpeed.y) : Mathf.NegativeInfinity));
         // The maximum speed should use the absolute values of m_maxSpeed's axes
         Vector2 maxSpeed = new Vector2(Mathf.Abs(m_maxSpeed.x), Mathf.Abs(m_maxSpeed.y));
         // Clamp the RigidBody's velocity if m_maxSpeed is greater than zero. 
