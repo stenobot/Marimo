@@ -3,7 +3,7 @@ A game project called Marimo.
 
 ## Unity Guidelines
 ### Quick Start
-1. We're using Unity 5.6.x, which you can download here:
+1. We're using Unity 2017.1, which you can download here:
 [https://store.unity.com/download?ref=update](https://store.unity.com/download?ref=update)
 You can probably leave the default selection options when installing. This game will be PC only (at first), and we're not using any built-in textures/sprites or anything like that.
 2. Install Tiled from here (most recent version should be fine... we're currently on 0.18.2):
