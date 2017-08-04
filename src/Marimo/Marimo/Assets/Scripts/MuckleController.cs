@@ -71,11 +71,11 @@ public class MuckleController : RigidBodyBehavior
     }
 
     /// <summary>
-    /// Update is called once per frame
+    /// FixedUpdate should be used instead of Update when dealing with Rigidbody
     /// </summary>
-    protected override void Update()
+    protected override void FixedUpdate()
     {
-        base.Update();
+        base.FixedUpdate();
 
         if (!m_canControl || m_gameManager.IsPaused)
             return;

@@ -25,11 +25,11 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
     }
 
     /// <summary>
-    /// Update is called once per frame
+    /// FixedUpdate should be used instead of Update when dealing with Rigidbody
     /// </summary>
-    protected virtual void Update()
+    protected virtual void FixedUpdate()
     {
-        if (m_rig != null)
+        if (m_rig != null && !m_rig.isKinematic)
             ApplyForce();
     }
 

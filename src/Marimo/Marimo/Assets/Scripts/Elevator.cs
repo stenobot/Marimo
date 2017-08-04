@@ -59,19 +59,17 @@ public class Elevator : MonoBehaviour
         m_targetHeight = StopHeight;
     }
 
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// FixedUpdate should be used instead of Update when dealing with Rigidbody
+    /// </summary>
+    void FixedUpdate()
     {
         if (IsMoving)
         {
             if (ElevatorCanMove())
-            {
                 Move(m_moveDirection);
-            }
             else
-            {
                 Stop();
-            }
         }
     }
 
@@ -88,7 +86,7 @@ public class Elevator : MonoBehaviour
         {
             // Make the player a child of the elevator
             GameObject.FindGameObjectWithTag(Globals.TAG_PLAYER).transform.parent = transform;
-            // Make the player kinematic so physics doesn't affect it
+            // Make the player kinematic so physics doesn't affect it, also disabled RigidBodyBehavior
             m_playerRig.isKinematic = true;
             IsMoving = true;
             m_targetHeight = m_targetHeight == StartHeight ? StopHeight : StartHeight;
