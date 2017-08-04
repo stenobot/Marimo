@@ -74,9 +74,9 @@ public class Trash : RigidBodyBehavior
     }
 	
 	// object update once per frame
-	protected override void Update()
+	protected override void FixedUpdate()
     {
-        base.Update();
+        base.FixedUpdate();
         if (IsActive)
         {
             // check if trash has not been activated, 

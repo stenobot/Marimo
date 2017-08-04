@@ -97,9 +97,9 @@ public class RobotController : RigidBodyBehavior
     /// <summary>
     /// Update is called once per frame
     /// </summary>
-    protected override void Update()
+    protected override void FixedUpdate()
     {
-        base.Update();
+        base.FixedUpdate();
         if (!m_canControl || m_gameManager.IsPaused)
         {
             m_audio.volume = 0;
