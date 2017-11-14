@@ -5,9 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using System.Xml;
+using System.Xml.Serialization;
 
 public class TmxImportProcessor : AssetPostprocessor
 {
+    private static Dictionary<int, string> m_assetDbTilePaths;
     private static string m_imgDir;
     private static string m_imgFsDir;
     private static int m_pixelsPerUnit;
@@ -136,8 +139,8 @@ public class TmxImportProcessor : AssetPostprocessor
                         // Detemine path in asset database
                         string assetDbPath = newFile.Replace('\\', '/');
                         assetDbPath = assetDbPath.Substring(assetDbPath.IndexOf(m_imgDir));
-                        if (!TmxImporter.AssetDbTilePaths.ContainsKey(tile.Id))
-                            TmxImporter.AssetDbTilePaths.Add(tile.Id, assetDbPath);
+                        if (!m_assetDbTilePaths.ContainsKey(tile.Id))
+                            m_assetDbTilePaths.Add(tile.Id, assetDbPath);
                         AssetDatabase.ImportAsset(assetDbPath);
                         AssetDatabase.Refresh();
                         tilesImported++;
@@ -179,8 +182,8 @@ public class TmxImportProcessor : AssetPostprocessor
             {
                 for (int row = 0; row < layer.Height; row++)
                 {
-                    int tileId = layer.Data.MapData[col, row] - 1;
-                    if (tileId >= 0 && TmxImporter.AssetDbTilePaths.ContainsKey(tileId))
+                    int tileId = layer.Data.MapData[col, row];
+                    if (tileId >= 0 && m_assetDbTilePaths.ContainsKey(tileId))
                     {
                         GameObject g = new GameObject(tileId.ToString());
                         g.transform.parent = layerParent.transform;
@@ -188,16 +191,16 @@ public class TmxImportProcessor : AssetPostprocessor
                         SpriteRenderer r = g.AddComponent<SpriteRenderer>();
                         r.sortingOrder = layerIndex;
 
-                        UnityEngine.Object tex2d = AssetDatabase.LoadMainAssetAtPath(TmxImporter.AssetDbTilePaths[tileId]);
+                        UnityEngine.Object tex2d = AssetDatabase.LoadMainAssetAtPath(m_assetDbTilePaths[tileId]);
                         if (tex2d != null)
                         {
                             //Sprite s = Sprite.Create(tex2d, new Rect(), Vector2.zero);
-                            Debug.Log("s IS NOT NULL for " + tileId + " at path " + TmxImporter.AssetDbTilePaths[tileId]);
+                            Debug.Log("s IS NOT NULL for " + tileId + " at path " + m_assetDbTilePaths[tileId]);
                             //r.sprite = s;
                         }
                         else
                         {
-                            Debug.Log(string.Format("Couldn't load sprite from AssetDatabase at path {0}", TmxImporter.AssetDbTilePaths[tileId]));
+                            Debug.Log(string.Format("Couldn't load sprite from AssetDatabase at path {0}", m_assetDbTilePaths[tileId]));
                         }
                     }
                 }
@@ -232,7 +235,30 @@ public class TmxImportProcessor : AssetPostprocessor
     /// <param name="mapFile">The map file which was imported</param>
     private static Map ImportMap(string mapFile)
     {
-        Map map = TmxImporter.ImportTmxFile(mapFile);
-        return map;
+            Map map = null;
+            FileStream stream = null;
+            XmlReader reader = null;
+            m_assetDbTilePaths = new Dictionary<int, string>();
+
+            try
+            {
+                XmlSerializer mapSerializer = new XmlSerializer(typeof(Map));
+                stream = new FileStream(mapFile, FileMode.Open);
+                reader = XmlReader.Create(stream);
+                map = (Map)mapSerializer.Deserialize(reader);
+            }
+            catch (UnityException ex)
+            {
+                Debug.LogException(ex);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+                if (stream != null)
+                    stream.Close();
+            }
+
+            return map;
     }
 }
