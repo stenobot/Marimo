@@ -12,7 +12,6 @@ public class TmxImportProcessor : AssetPostprocessor
 {
     private static string m_imgDir;
     private static string m_imgFsDir;
-    private static int m_pixelsPerUnit;
     private static Dictionary<int, string> m_tilePaths;
 
     private enum AssetChangeType
@@ -39,32 +38,27 @@ public class TmxImportProcessor : AssetPostprocessor
     // texture asset preprocessor
     public void OnPreprocessTexture()
     {
+        // Only process assets in the import directory
         if (!assetPath.Contains(m_imgDir))
-        {
-            Debug.Log(assetPath + " didn't make the cut");
             return;
-        }
-
-        m_pixelsPerUnit = EditorPrefs.GetInt("PPU");
 
         TextureImporter importer = assetImporter as TextureImporter;
         if (importer != null)
         {
             TextureImporterSettings texSettings = new TextureImporterSettings();
             importer.ReadTextureSettings(texSettings);
-            texSettings.spriteMode = (int)SpriteImportMode.Single;
-            texSettings.filterMode = FilterMode.Point;
-            texSettings.alphaIsTransparency = true;
-            texSettings.alphaSource = TextureImporterAlphaSource.FromInput;
-            texSettings.mipmapEnabled = false;
-            texSettings.spritePixelsPerUnit = m_pixelsPerUnit;
-            texSettings.spriteExtrude = 0;
-
+            texSettings.spriteMode = (int)TmxImporter.SpriteMode;
+            texSettings.filterMode = TmxImporter.FilterMode;
+            texSettings.alphaIsTransparency = TmxImporter.AlphaIsTransparency;
+            texSettings.alphaSource = TmxImporter.AlphaSource;
+            texSettings.mipmapEnabled = TmxImporter.MipMapEnabled;
+            texSettings.spriteExtrude = TmxImporter.ExtrudeEdges;
+            texSettings.spritePixelsPerUnit = TmxImporter.PixelsPerUnit;
+            
             TextureImporterPlatformSettings texPlatSettings = new TextureImporterPlatformSettings();
-            texPlatSettings.textureCompression = TextureImporterCompression.Uncompressed;
-            texPlatSettings.maxTextureSize = 4096;
+            texPlatSettings.textureCompression = TmxImporter.TextureCompression;
+            texPlatSettings.maxTextureSize = (int)TmxImporter.MaxTextureSize;
 
-            importer.mipmapEnabled = false;
             importer.SetTextureSettings(texSettings);
             importer.SetPlatformTextureSettings(texPlatSettings);
         }
