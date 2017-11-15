@@ -92,7 +92,7 @@ namespace Assets.Schema
                         for (int col = 0; col < rowDataStr.Length; col++)
                         {
                             int parsedInt = -1;
-                            if (int.TryParse(rowDataStr[0], out parsedInt))
+                            if (int.TryParse(rowDataStr[col], out parsedInt))
                                 MapData[col, row] = parsedInt;
                         }
                     }
