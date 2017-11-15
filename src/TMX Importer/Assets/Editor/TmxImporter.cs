@@ -8,20 +8,20 @@ using UnityEngine;
 public class TmxImporter : EditorWindow
 {
     // TextureImporterSettings
-    public static int PixelsPerUnit { get; private set; }
-    public static SpriteImportMode SpriteMode { get; private set; }
-    public static FilterMode FilterMode { get; private set; }
-    public static bool AlphaIsTransparency { get; private set; }
-    public static TextureImporterAlphaSource AlphaSource { get; private set; }
-    public static bool MipMapEnabled { get; private set; }
-    public static uint ExtrudeEdges { get; private set; }
+    private int m_pixelsPerUnit;
+    private SpriteImportMode m_spriteMode;
+    private FilterMode m_filterMode;
+    private bool m_alphaIsTransparency;
+    private TextureImporterAlphaSource m_alphaSource;
+    private bool m_mipMapEnabled;
+    private uint m_extrudeEdges;
 
     // TextureImporterPlatformSettings
-    public static TextureImporterCompression TextureCompression { get; private set; }
-    public static TextureSize MaxTextureSize { get; private set; }
+    private TextureImporterCompression m_textureCompression;
+    private TextureSize m_maxTextureSize;
 
-    // Enum needed to limit available values in the MaxTextureSize dropdown
-    public enum TextureSize
+    // Enum used to limit available values in the MaxTextureSize dropdown
+    private enum TextureSize
     {
         // Underscores are because we can't start a name with a number in C#
         _32 = 32,
@@ -35,40 +35,47 @@ public class TmxImporter : EditorWindow
         _8192 = 8192
     }
 
-    private bool m_collapseImportSettings = false;
-
+    /// <summary>
+    /// Invoked when the TMX Importer window is opened
+    /// </summary>
     private void OnEnable()
     {
         // TextureImporterSettings
-        PixelsPerUnit = EditorPrefs.GetInt("PixelsPerUnit");
-        SpriteMode = (SpriteImportMode)EditorPrefs.GetInt("SpriteMode");
-        FilterMode = (FilterMode)EditorPrefs.GetInt("FilterMode");
-        AlphaIsTransparency = EditorPrefs.GetBool("AlphaIsTransparency");
-        AlphaSource = (TextureImporterAlphaSource)EditorPrefs.GetInt("AlphaSource");
-        MipMapEnabled = EditorPrefs.GetBool("MipMapEnabled");
-        ExtrudeEdges = (uint)EditorPrefs.GetInt("ExtrudeEdges");
+        m_pixelsPerUnit = EditorPrefs.GetInt("PixelsPerUnit");
+        m_spriteMode = (SpriteImportMode)EditorPrefs.GetInt("SpriteMode");
+        m_filterMode = (FilterMode)EditorPrefs.GetInt("FilterMode");
+        m_alphaIsTransparency = EditorPrefs.GetBool("AlphaIsTransparency");
+        m_alphaSource = (TextureImporterAlphaSource)EditorPrefs.GetInt("AlphaSource");
+        m_mipMapEnabled = EditorPrefs.GetBool("MipMapEnabled");
+        m_extrudeEdges = (uint)EditorPrefs.GetInt("ExtrudeEdges");
 
         // TextureImporterPlatformSettings
-        TextureCompression = (TextureImporterCompression)EditorPrefs.GetInt("TextureCompression");
-        MaxTextureSize = (TextureSize)EditorPrefs.GetInt("MaxTextureSize");
+        m_textureCompression = (TextureImporterCompression)EditorPrefs.GetInt("TextureCompression");
+        m_maxTextureSize = (TextureSize)EditorPrefs.GetInt("MaxTextureSize");
     }
 
+    /// <summary>
+    /// Invoked when the TMX Importer window is closed 
+    /// </summary>
     private void OnDisable()
     {
         // TextureImporterSettings
-        EditorPrefs.SetInt("PixelsPerUnit", PixelsPerUnit);
-        EditorPrefs.SetInt("SpriteMode", (int)SpriteMode);
-        EditorPrefs.SetInt("FilterMode", (int)FilterMode);
-        EditorPrefs.SetBool("AlphaIsTransparency", AlphaIsTransparency);
-        EditorPrefs.SetInt("AlphaSource", (int)AlphaSource);
-        EditorPrefs.SetBool("MipMapEnabled", MipMapEnabled);
-        EditorPrefs.SetInt("ExtrudeEdges", (int)ExtrudeEdges);
+        EditorPrefs.SetInt("PixelsPerUnit", m_pixelsPerUnit);
+        EditorPrefs.SetInt("SpriteMode", (int)m_spriteMode);
+        EditorPrefs.SetInt("FilterMode", (int)m_filterMode);
+        EditorPrefs.SetBool("AlphaIsTransparency", m_alphaIsTransparency);
+        EditorPrefs.SetInt("AlphaSource", (int)m_alphaSource);
+        EditorPrefs.SetBool("MipMapEnabled", m_mipMapEnabled);
+        EditorPrefs.SetInt("ExtrudeEdges", (int)m_extrudeEdges);
 
         // TextureImporterPlatformSettings
-        EditorPrefs.SetInt("TextureCompression", (int)TextureCompression);
-        EditorPrefs.SetInt("MaxTextureSize", (int)MaxTextureSize);
+        EditorPrefs.SetInt("TextureCompression", (int)m_textureCompression);
+        EditorPrefs.SetInt("MaxTextureSize", (int)m_maxTextureSize);
     }
 
+    /// <summary>
+    /// Sets up the menu entry and the window
+    /// </summary>
     [MenuItem("Window/TMX Importer")]
     private static void OpenWindow()
     {
@@ -76,19 +83,21 @@ public class TmxImporter : EditorWindow
         window.titleContent = new GUIContent("TMX Importer");
     }
 
+    /// <summary>
+    /// Draws the UI for the TMX Importer window
+    /// </summary>
     void OnGUI()
     {
-        // Build out the window UI
         GUILayout.Label("Sprite Import Settings", EditorStyles.boldLabel);
-        PixelsPerUnit = EditorGUILayout.IntField("Pixels Per Unit", PixelsPerUnit);
-        SpriteMode = (SpriteImportMode)EditorGUILayout.EnumPopup("Sprite Mode: ", SpriteMode);
-        FilterMode = (FilterMode)EditorGUILayout.EnumPopup("Filter Mode: ", FilterMode);
-        AlphaIsTransparency = EditorGUILayout.Toggle("Alpha is Transparency: ", AlphaIsTransparency);
-        AlphaSource = (TextureImporterAlphaSource)EditorGUILayout.EnumPopup("Alpha Source: ", AlphaSource);
-        MipMapEnabled = EditorGUILayout.Toggle("Generate Mip Maps: ", MipMapEnabled);
-        ExtrudeEdges = (uint)EditorGUILayout.IntSlider("Extrude Edges: ", (int)ExtrudeEdges, 0, 32);
-        TextureCompression = (TextureImporterCompression)EditorGUILayout.EnumPopup("Texture Compression: ", TextureCompression);
-        MaxTextureSize = (TextureSize)EditorGUILayout.EnumPopup("Max Size: ", MaxTextureSize);
+        m_pixelsPerUnit = EditorGUILayout.IntField("Pixels Per Unit", m_pixelsPerUnit);
+        m_spriteMode = (SpriteImportMode)EditorGUILayout.EnumPopup("Sprite Mode: ", m_spriteMode);
+        m_filterMode = (FilterMode)EditorGUILayout.EnumPopup("Filter Mode: ", m_filterMode);
+        m_alphaIsTransparency = EditorGUILayout.Toggle("Alpha is Transparency: ", m_alphaIsTransparency);
+        m_alphaSource = (TextureImporterAlphaSource)EditorGUILayout.EnumPopup("Alpha Source: ", m_alphaSource);
+        m_mipMapEnabled = EditorGUILayout.Toggle("Generate Mip Maps: ", m_mipMapEnabled);
+        m_extrudeEdges = (uint)EditorGUILayout.IntSlider("Extrude Edges: ", (int)m_extrudeEdges, 0, 32);
+        m_textureCompression = (TextureImporterCompression)EditorGUILayout.EnumPopup("Texture Compression: ", m_textureCompression);
+        m_maxTextureSize = (TextureSize)EditorGUILayout.EnumPopup("Max Size: ", m_maxTextureSize);
 
         // Save current values
         PlayerPrefs.Save();
