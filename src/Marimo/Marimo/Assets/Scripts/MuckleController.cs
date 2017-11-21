@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Character controller for Muckle. Inherits <see cref="RigidBodyBehavior"/> and implements <see cref="IRigidBodyBehavior"/>
+/// Character controller for Muckle
 /// </summary>
-public class MuckleController : RigidBodyBehavior
+public class MuckleController : MonoBehaviour
 {
     #region Public editor variables
 
@@ -60,9 +60,8 @@ public class MuckleController : RigidBodyBehavior
     /// <summary>
     /// Use this for initialization
     /// </summary>
-    protected override void Start()
+    private void Start()
     {
-        base.Start();
         m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         m_anim = GetComponentInChildren<Animator>();
         m_audio = GetComponentInChildren<AudioSource>();
@@ -73,10 +72,8 @@ public class MuckleController : RigidBodyBehavior
     /// <summary>
     /// FixedUpdate should be used instead of Update when dealing with Rigidbody
     /// </summary>
-    protected override void FixedUpdate()
+    private void FixedUpdate()
     {
-        base.FixedUpdate();
-
         if (!m_canControl || m_gameManager.IsPaused)
             return;
         // Process input
@@ -135,25 +132,30 @@ public class MuckleController : RigidBodyBehavior
                 (xAxisInput > 0) ? 1 :
                 transform.localScale.x, transform.localScale.y);
 
+            Vector2 currentDirection = new Vector2(xAxisInput, yAxisInput).normalized;
+
             // Boost mode only permitted if the X or Y axis has input
             if (Input.GetButtonDown(Globals.INPUT_BUTTON_FIRE0))
             {
                 if (!m_boostMode)
                 {
                     BoostMode();
-                    Vector2 currentDirection = new Vector2(xAxisInput, yAxisInput).normalized;
                     m_rigidBody.AddForce(currentDirection * BoostForce, ForceMode2D.Impulse);
                 }
+            }
+            else
+            {
+                m_rigidBody.AddForce(currentDirection * MoveForce, ForceMode2D.Force);
             }
         }
 
         // Calculate the real max speed by adding the current boost speed to MaxSpeed
+        // TODO: Factor in the force applied by any intersecting AreaEffector2D
         Vector2 trueMaxSpeed = new Vector2(
             MaxSpeed + ((m_boostMode) ? m_maxBoostSpeed : 0),
             MaxSpeed + ((m_boostMode) ? m_maxBoostSpeed : 0));
 
-        // Apply the force modifier
-        AddConstantForce(gameObject, new Vector2(xAxisInput * MoveForce, yAxisInput * MoveForce), trueMaxSpeed);
+        m_rigidBody.velocity = MathHelper.Clamp(m_rigidBody.velocity, -trueMaxSpeed, trueMaxSpeed);
     }
 
     /// <summary>
