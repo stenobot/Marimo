@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// To be inherited by rigidbodies which need to react to force modifiers
 /// </summary>
-public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
+public abstract class RigidBodyBehavior : MonoBehaviour
 {
     /// <summary>
     /// Contains the list of force modifiers which should be applied to the velocity of the <see cref="Rigidbody2D"/>
@@ -18,7 +18,7 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
     /// <summary>
     /// Use this for initialization
     /// </summary>
-    protected virtual void Start()
+    private void Start()
     {
         ForceModifiers = new List<ForceModifier>();
         m_rig = GetComponent<Rigidbody2D>();
@@ -27,7 +27,7 @@ public abstract class RigidBodyBehavior : MonoBehaviour, IRigidBodyBehavior
     /// <summary>
     /// FixedUpdate should be used instead of Update when dealing with Rigidbody
     /// </summary>
-    protected virtual void FixedUpdate()
+    private void FixedUpdate()
     {
         if (m_rig != null && !m_rig.isKinematic)
             ApplyForce();
