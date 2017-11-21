@@ -373,7 +373,9 @@ public class RobotController : MonoBehaviour
     {
         // Check if the player is touching the ground layer
         // m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
-        // TODO: Our grounding seems busted in 2017.2, isTouchingLayers() call returns false
+        // TODO: Our grounding seems busted in 2017.2, isTouchingLayers() call returns false. 
+        // A supposedly disabled slope collider is causing a collision.
+        // Found the thread, no response yet https://issuetracker.unity3d.com/issues/setting-collider-dot-enabled-to-false-in-animation-does-not-disable-the-collider
         if (m_treadCollider != null)
             m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask);
 
