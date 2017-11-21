@@ -60,4 +60,5 @@ public class Globals
 	// Global values
     public const float PIXELS_PER_UNIT = 6f;
     public const float PIXEL_SIZE = 1f / PIXELS_PER_UNIT;
+    public const int PIXEL_SCALE = 3;
 }

@@ -24,6 +24,12 @@ public class FollowTarget : MonoBehaviour {
     /// </summary>
     public float MinYPosition = 0f;
 
+    private void Start()
+    {
+        // Scale camera all fancy-like for pixel perfection in any resolution
+        GetComponent<Camera>().orthographicSize = Screen.height / (2 * (Globals.PIXELS_PER_UNIT * Globals.PIXEL_SCALE));
+    }
+
     /// <summary>
     /// LateUpdate should be used for camera functions like this as the objects can move during Update() and LateUpdate() fires last
     /// </summary>
