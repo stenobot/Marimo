@@ -58,7 +58,7 @@ public class Globals
     public const string TAG_PIPES = "Pipes";
 
 	// Global values
-    public const float PIXELS_PER_UNIT = 6f;
+    public const float PIXELS_PER_UNIT = 8f;
     public const float PIXEL_SIZE = 1f / PIXELS_PER_UNIT;
-    public const int PIXEL_SCALE = 3;
+    public const int PIXEL_SCALE = 2;
 }
