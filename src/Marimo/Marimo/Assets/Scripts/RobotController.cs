@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Character controller script for the robot
 /// </summary>
-public class RobotController : RigidBodyBehavior
+public class RobotController : MonoBehaviour
 {
     // The force to apply to the player each frame while moving
     public float MoveForce = 16f;
@@ -79,9 +79,8 @@ public class RobotController : RigidBodyBehavior
     /// <summary>
     /// Use this for initialization
     /// </summary>
-    protected override void Start()
+    private void Start()
     {
-        base.Start();
         // Set the game manager reference
         m_gameManager = GameObject.FindGameObjectWithTag(Globals.TAG_GAMEMANAGER).GetComponent<GameManager>();
         // Set the rigidbody reference
@@ -97,9 +96,8 @@ public class RobotController : RigidBodyBehavior
     /// <summary>
     /// Update is called once per frame
     /// </summary>
-    protected override void FixedUpdate()
+    private void FixedUpdate()
     {
-        base.FixedUpdate();
         if (!m_canControl || m_gameManager.IsPaused)
         {
             m_audio.volume = 0;
@@ -195,10 +193,6 @@ public class RobotController : RigidBodyBehavior
         // Only allow jumping while grounded
         if (tryJump)
             Jump();
-
-        // If the X and Y axis are both zero, remove the constant force applied
-        if (xAxisInput == 0 && yAxisInput == 0)
-            RemoveConstantForce(gameObject);
 
         // Set animation state, speed, and audio pitch
         SetAnimationStates();
@@ -358,7 +352,9 @@ public class RobotController : RigidBodyBehavior
             Animator_ThoughtBubble.transform.localScale = new Vector3(scale, 1);
 
             // Add force to the player
-            AddConstantForce(gameObject, Vector2.right * MoveForce * xAxisInput, new Vector2(MaxSpeed, MaxJumpSpeed));
+            // TODO: Factor for AreaEffector2D in clamping
+            m_rigidBody.AddForce(Vector2.right * MoveForce * xAxisInput, ForceMode2D.Force);
+            m_rigidBody.velocity = MathHelper.Clamp(m_rigidBody.velocity, new Vector2(-MaxSpeed, Mathf.NegativeInfinity), new Vector2(MaxSpeed, MaxJumpSpeed));
             // The player has completed their movement action for this frame
             m_hasMovedForFrame = true;
         }
@@ -376,9 +372,13 @@ public class RobotController : RigidBodyBehavior
     private void CheckIfGrounded()
     {
         // Check if the player is touching the ground layer
-        //m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
+        // m_isGrounded = Physics2D.OverlapCircle(transform.position, .05f, GroundLayerMask);
+        // TODO: Our grounding seems busted in 2017.2, isTouchingLayers() call returns false. 
+        // A supposedly disabled slope collider is causing a collision.
+        // Found the thread, no response yet https://issuetracker.unity3d.com/issues/setting-collider-dot-enabled-to-false-in-animation-does-not-disable-the-collider
         if (m_treadCollider != null)
             m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask);
+
 
         Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
         m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
