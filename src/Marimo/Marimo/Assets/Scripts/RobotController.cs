@@ -373,10 +373,12 @@ public class RobotController : MonoBehaviour
         m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
 
         // Set raycast parameters for slope testing
-        float rayLength = .4f;
+        float rayLength = .8f;
         float rayOffset = Animator_Body.transform.localScale.x > 0 ? .3f : -.3f;
+        // Stops center hit origin from being too low on slopes
+        float yOffset = .25f;
         Vector2 rayDirection = Vector2.down;
-        Vector2 rayOrigin = transform.position;
+        Vector2 rayOrigin = new Vector2(transform.position.x, transform.position.y + yOffset);
 
         // Create 3 downward raycasts. One at the player center, one in front and one behind
         RaycastHit2D centerHit = Physics2D.Raycast(rayOrigin, rayDirection, rayLength, GroundLayerMask);
