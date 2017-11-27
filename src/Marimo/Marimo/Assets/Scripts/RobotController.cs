@@ -74,7 +74,6 @@ public class RobotController : MonoBehaviour
     private bool m_canMoveHorizontal = false;
     private bool m_hasMovedForFrame = false;
     private Elevator m_elevator;
-    private Conveyor m_conveyor;
 
     /// <summary>
     /// Use this for initialization
@@ -221,7 +220,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if ((m_isGrounded || (m_conveyor != null) || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
+        if ((m_isGrounded || (m_elevator != null && !m_elevator.IsMoving)) && !m_isNeckExtended)
         {
             // Add jump force to the player
             m_rigidBody.AddForce(Vector2.up * JumpForce);
@@ -364,20 +363,22 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void CheckIfGrounded()
     {
-        // Check if the player is touching the ground layer
+        // Check if the player is touching the ground layer, a collider or elevator
         if (m_treadCollider != null)
-            m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask);
+            m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask) || 
+                m_treadCollider.IsTouchingLayers(ConveyorLayerMask) || 
+                m_treadCollider.IsTouchingLayers(ElevatorLayerMask);
 
         Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
         m_elevator = (elevatorCol != null) ? elevatorCol.GetComponent<Elevator>() : null;
-        Collider2D conveyorCol = Physics2D.OverlapCircle(transform.position, .05f, ConveyorLayerMask);
-        m_conveyor = (conveyorCol != null) ? conveyorCol.GetComponent<Conveyor>() : null;
 
         // Set raycast parameters for slope testing
-        float rayLength = .4f;
+        float rayLength = .8f;
         float rayOffset = Animator_Body.transform.localScale.x > 0 ? .3f : -.3f;
+        // Stops center hit origin from being too low on slopes
+        float yOffset = .25f;
         Vector2 rayDirection = Vector2.down;
-        Vector2 rayOrigin = transform.position;
+        Vector2 rayOrigin = new Vector2(transform.position.x, transform.position.y + yOffset);
 
         // Create 3 downward raycasts. One at the player center, one in front and one behind
         RaycastHit2D centerHit = Physics2D.Raycast(rayOrigin, rayDirection, rayLength, GroundLayerMask);
