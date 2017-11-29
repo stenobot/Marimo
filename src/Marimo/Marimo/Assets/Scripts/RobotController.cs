@@ -46,6 +46,7 @@ public class RobotController : MonoBehaviour
     public Animator Animator_ThoughtBubble;
     public Animator Animator_ToolIcon;
     public Animator Animator_InteractionIcon;
+	public Animator Animator_BkgLight;
 
     // Sound effects
     public AudioClip Audio_Move;
@@ -302,17 +303,23 @@ public class RobotController : MonoBehaviour
 
             if (canAnimate && m_canMoveVertical)
             {
-                // Set the AnimSpeed parameter in the Animator
+                // Set the AnimSpeed parameter in the Animators
                 Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
+				Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
+
                 // Raise or lower the telescope
                 Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
+				// Raise or lower the background light
+				Animator_BkgLight.Play(Globals.ANIMSTATE_ROBOT_RAISE);
+
                 // The player has completed their movement action for this frame
                 m_hasMovedForFrame = true;
             }
             else
             {
-                // Stop the animation on the current frame
+                // Stop the animations on the current frame
                 Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
+				Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
             }
         }
     }
