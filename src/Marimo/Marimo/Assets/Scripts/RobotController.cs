@@ -46,7 +46,7 @@ public class RobotController : MonoBehaviour
     public Animator Animator_ThoughtBubble;
     public Animator Animator_ToolIcon;
     public Animator Animator_InteractionIcon;
-	public Animator Animator_BkgLight;
+    public Animator Animator_BkgLight;
 
     // Sound effects
     public AudioClip Audio_Move;
@@ -93,8 +93,19 @@ public class RobotController : MonoBehaviour
         InvokeRepeating("HasFallen", 1, 1);
     }
 
+
     /// <summary>
-    /// Update is called once per frame
+    /// Update needs to be used for input as FixedUpdate will have loss
+    /// </summary>
+    private void Update()
+    {
+        if (!IsDead)
+            // Process input
+            HandleInput();
+    }
+
+    /// <summary>
+    /// FixedUpdate should be used for rigidbody movement and fixed time tasks
     /// </summary>
     private void FixedUpdate()
     {
@@ -111,8 +122,6 @@ public class RobotController : MonoBehaviour
         {
             // Get the tread collider reference
             SetTreadCollider();
-            // Process input
-            HandleInput();
         }
     }
 
@@ -184,6 +193,7 @@ public class RobotController : MonoBehaviour
         // Compare the X and Y axis input and determine which should take preference
         SetMovementAxes(xAxisInput, yAxisInput);
 
+        // TODO: Move the rigidbody movement under FixedUpdate(). input stays in Update() to prevent loss.
         // Move the player vertically (if permitted)
         MoveVertical(yAxisInput);
 
@@ -305,12 +315,12 @@ public class RobotController : MonoBehaviour
             {
                 // Set the AnimSpeed parameter in the Animators
                 Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
-				Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
+                Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, yAxisInput);
 
                 // Raise or lower the telescope
                 Animator_Body.Play(Globals.ANIMSTATE_ROBOT_RAISE);
-				// Raise or lower the background light
-				Animator_BkgLight.Play(Globals.ANIMSTATE_ROBOT_RAISE);
+                // Raise or lower the background light
+                Animator_BkgLight.Play(Globals.ANIMSTATE_ROBOT_RAISE);
 
                 // The player has completed their movement action for this frame
                 m_hasMovedForFrame = true;
@@ -319,7 +329,7 @@ public class RobotController : MonoBehaviour
             {
                 // Stop the animations on the current frame
                 Animator_Body.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
-				Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
+                Animator_BkgLight.SetFloat(Globals.ANIM_PARAM_SPEED, 0);
             }
         }
     }
@@ -372,8 +382,8 @@ public class RobotController : MonoBehaviour
     {
         // Check if the player is touching the ground layer, a collider or elevator
         if (m_treadCollider != null)
-            m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask) || 
-                m_treadCollider.IsTouchingLayers(ConveyorLayerMask) || 
+            m_isGrounded = m_treadCollider.IsTouchingLayers(GroundLayerMask) ||
+                m_treadCollider.IsTouchingLayers(ConveyorLayerMask) ||
                 m_treadCollider.IsTouchingLayers(ElevatorLayerMask);
 
         Collider2D elevatorCol = Physics2D.OverlapCircle(transform.position, .05f, ElevatorLayerMask);
