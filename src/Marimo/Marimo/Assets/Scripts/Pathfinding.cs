@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -27,11 +26,11 @@ public class Pathfinding : MonoBehaviour
 
         foreach (Tilemap map in CollisionTilemaps)
         {
-            for (int x = 0; x < map.size.x; x++)
-                for (int y = 0; y < map.size.y; y++)
-                    for (int z = 0; z < map.size.z; z++)
-                        if (map.GetColliderType(new Vector3Int(x, y, z)) == Tile.ColliderType.Sprite)
-                            Debug.Log("Found collider on tile: " + map.GetTile(new Vector3Int(x, y, z)).name);
+            //for (int x = 0; x < map.size.x; x++)
+            //    for (int y = 0; y < map.size.y; y++)
+            //        for (int z = 0; z < map.size.z; z++)
+            //            if (map.GetColliderType(new Vector3Int(x, y, z)) == Tile.ColliderType.Sprite)
+            //                Debug.Log("Found collider on tile: " + map.GetTile(new Vector3Int(x, y, z)).name);
         }
         return path;
     }
