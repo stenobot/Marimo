@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WaterFlow : MonoBehaviour
 {
-    public float Speed = 1.0f;
+    public float Interval = 1.0f;
     public LayerMask PipeLayerMask;
     public GameObject VisualizationPrefab;
     public float MoveScale = 2.0f;
@@ -29,7 +29,7 @@ public class WaterFlow : MonoBehaviour
     void Start()
     {
         m_flows = new List<Flow>() { new Flow(transform.position, Vector2.down, Instantiate(VisualizationPrefab, transform.position, Quaternion.identity)) };
-        InvokeRepeating("Advance", 0, Speed);
+        InvokeRepeating("Advance", Interval, Interval);
     }
 
     void Advance()
@@ -45,15 +45,13 @@ public class WaterFlow : MonoBehaviour
             Vector2 flowDir = flow.LastDirection;
 
             // If true while raycasts are evaluated a new Flow should be added to m_flows, as there's a fork in the path
+            // If false after evaluation, destroy the flow object as it can't go any further
             bool hasFlowed = false;
 
             // Just cast 3 rays, water can't defy gravity
             RaycastHit2D hitDown = Physics2D.Raycast(flowPos, Vector2.down, 1.0f * MoveScale, PipeLayerMask);
             RaycastHit2D hitLeft = Physics2D.Raycast(flowPos, Vector2.left, 1.0f * MoveScale, PipeLayerMask);
             RaycastHit2D hitRight = Physics2D.Raycast(flowPos, Vector2.right, 1.0f * MoveScale, PipeLayerMask);
-
-            if (hitDown.collider != null && hitLeft.collider != null && hitRight.collider != null)
-                continue;
 
             if (m_flows.Count > 1000)
                 throw new UnityException("Waterflow.cs is probably trying to break the computer...");
@@ -96,6 +94,7 @@ public class WaterFlow : MonoBehaviour
             if ((hitRight.collider == null) && (flowDir != Vector2.left))
             {
                 Debug.DrawRay(flowPos, Vector2.right, Color.green, .1f);
+
                 if (hasFlowed)
                 {
                     GameObject g = Instantiate(VisualizationPrefab, flowPos + (Vector2.right * MoveScale), Quaternion.identity);
@@ -111,9 +110,20 @@ public class WaterFlow : MonoBehaviour
                     else
                         Instantiate(VisualizationPrefab, flow.Position, Quaternion.identity);
                 }
+
+                hasFlowed = true;
             }
+
+            if (!hasFlowed)
+            {
+                // Can't move, EOL
+                m_flows.Remove(flow);
+                Destroy(flow.Object);
+            }
+
         }
 
-        Debug.Log("Flows: " + m_flows.Count);
+        if (m_flows.Count == 0)
+            CancelInvoke("Advance");
     }
 }
