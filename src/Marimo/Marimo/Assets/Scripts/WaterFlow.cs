@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class WaterFlow : MonoBehaviour
 {
     public float Interval = 1.0f;
+    public Tilemap PipeMap;
     public LayerMask PipeLayerMask;
     public GameObject VisualizationPrefab;
     public float MoveScale = 2.0f;
@@ -28,7 +30,9 @@ public class WaterFlow : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        m_flows = new List<Flow>() { new Flow(transform.position, Vector2.down, Instantiate(VisualizationPrefab, transform.position, Quaternion.identity)) };
+        GameObject g = Instantiate(VisualizationPrefab, transform.position, Quaternion.identity);
+        m_flows = new List<Flow>() { new Flow(transform.position, Vector2.down, g) };
+
         InvokeRepeating("Advance", Interval, Interval);
     }
 
@@ -58,10 +62,11 @@ public class WaterFlow : MonoBehaviour
 
             if (hitDown.collider == null)
             {
-                
                 Debug.DrawRay(flowPos, Vector2.down, Color.yellow, .1f);
                 flow.Position += Vector2.down * MoveScale;
                 flow.LastDirection = Vector2.down;
+                PipeMap.GetTile(new Vector3Int(Mathf.CeilToInt(flow.Position.x), Mathf.CeilToInt(flow.Position.y), 0));
+
                 hasFlowed = true;
                 if (flow.Object != null)
                     flow.Object.transform.position = flow.Position;
