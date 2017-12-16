@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
     #region Private variables
 
     // Gets or sets the active character
-    private Enums.PlayableCharacter m_activeCharacter;
+	private Enums.PlayableCharacter m_activeCharacter;
 
     #endregion
 

@@ -6,6 +6,11 @@ using UnityEditor;
 
 public class PipeTile : Tile 
 {
+	private const int SIDE_LEFT = 0;
+	private const int SIDE_BOTTOM = 1;
+	private const int SIDE_TOP = 2;
+	private const int SIDE_RIGHT = 3;
+
 	// array of all pipe sprites
 	public Sprite[] PipeSprites;
 
@@ -58,110 +63,107 @@ public class PipeTile : Tile
 		}
 
 		// change the current sprite
-		tileData.sprite = PipeSprites[AdjustedTileSpriteIndex(AdjacentPipeTiles)];
+		tileData.sprite = PipeSprites[(int)AdjustedTileSprite(AdjacentPipeTiles)];
 	}
 
 	/// <summary>
-	/// Adjusts the index of the tile sprite based on it's adjacent tile
+	/// Adjusts the tile sprite based on it's adjacent tile
 	/// </summary>
-	/// <returns>The correct tile sprite index</returns>
+	/// <returns>The correct tile sprite</returns>
 	/// <param name="AdjacentPipeTiles">Array of all four adjacent tiles "is pipe" status</param>
-	private int AdjustedTileSpriteIndex(bool[] AdjacentPipeTiles)
+	private Enums.PipeTileSprite AdjustedTileSprite(bool[] AdjacentPipeTiles)
 	{
-		if (AdjacentPipeTiles[0] == true) // left yes
+		if (AdjacentPipeTiles[SIDE_LEFT]) 
 		{ 	
-			if (AdjacentPipeTiles[1] == true) // bottom yes
+			if (AdjacentPipeTiles[SIDE_BOTTOM]) 
 			{ 
-				if (AdjacentPipeTiles[2] == true) // top yes
+				if (AdjacentPipeTiles[SIDE_TOP]) 
 				{ 
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{ 
-						return 14; // just water
+						return Enums.PipeTileSprite.OpenAll; 
 					} else // right no
 					{
-						return 7; // open right
+						return Enums.PipeTileSprite.OpenRight; 
 					}
 				} else // top no
 				{
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{
-						return 8; //open top
+						return Enums.PipeTileSprite.OpenTop; 
 					} else // right no
 					{
-						return 3; // corner top right
+						return Enums.PipeTileSprite.CornerTopRight; 
 					}
 				}
 			} else // bottom no
 			{
-				if (AdjacentPipeTiles[2] == true) // top yes
+				if (AdjacentPipeTiles[SIDE_TOP]) 
 				{
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{
-						return 5; // open bottom
+						return Enums.PipeTileSprite.OpenBottom; 
 					} else // right no
 					{
-						return 1; // corner bottom right
+						return Enums.PipeTileSprite.CornerBottomRight; 
 					}
 				} else // top no
 				{
-					if (AdjacentPipeTiles [3] == true) // right yes
+					if (AdjacentPipeTiles [SIDE_RIGHT]) 
 					{ 
-						return 4; // horizontal
+						return Enums.PipeTileSprite.Horizontal; 
 					} 
 					else // right no
 					{
-						return 11; // right cap
+						return Enums.PipeTileSprite.CapRight; 
 					}
 				}
 			}
 		} else // left no
 		{
-			if (AdjacentPipeTiles[1] == true) // bottom yes
+			if (AdjacentPipeTiles[SIDE_BOTTOM]) 
 			{ 
-				if (AdjacentPipeTiles[2] == true) // top yes
+				if (AdjacentPipeTiles[SIDE_TOP]) 
 				{ 
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{ 
-						return 6; // open left
+						return Enums.PipeTileSprite.OpenLeft; 
 					} else // right no
 					{
-						return 13; // vertical
+						return Enums.PipeTileSprite.Vertical; 
 					}
 				} else // top no
 				{
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{
-						return 2; // corner top left
+						return Enums.PipeTileSprite.CornerTopLeft; 
 					} else // right no
 					{
-						return 12; // top cap
+						return Enums.PipeTileSprite.CapTop; 
 					}
 				}
 			} else // bottom no
 			{
-				if (AdjacentPipeTiles[2] == true) // top yes
+				if (AdjacentPipeTiles[SIDE_TOP]) 
 				{
-					if (AdjacentPipeTiles[3] == true) // right yes
+					if (AdjacentPipeTiles[SIDE_RIGHT]) 
 					{
-						return 0; // corner bottom left
+						return Enums.PipeTileSprite.CornerBottomLeft; 
 					} else // right no
 					{
-						return 9; // bottom cap
+						return Enums.PipeTileSprite.CapBottom; 
 					}
 				} else // top no
 				{
-					if (AdjacentPipeTiles [3] == true) // right yes
+					if (AdjacentPipeTiles [SIDE_RIGHT]) 
 					{ 
-						return 10; // left cap
+						return Enums.PipeTileSprite.CapLeft; 
 					} 
-					else // right no
-					{
-					}
 				}
 			}
 		}
 
-		return 4; // default horizontal
+		return Enums.PipeTileSprite.Horizontal; 
 	}
 
 	/// <summary>
