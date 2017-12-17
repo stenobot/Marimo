@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEditor;
+using System;
 
 public class PipeTile : Tile 
 {
@@ -13,6 +14,15 @@ public class PipeTile : Tile
 
 	// array of all pipe sprites
 	public Sprite[] PipeSprites;
+
+    [Serializable]
+    public struct DrainAnim
+    {
+        public Enums.PipeTileSprite PipeSpriteType;
+        public Sprite[] AnimSprites;
+    }
+
+    public DrainAnim[] DrainAnimations;
 
 	public override void RefreshTile(Vector3Int position, ITilemap tilemap)
 	{
