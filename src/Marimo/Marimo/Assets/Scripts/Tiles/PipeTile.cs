@@ -12,9 +12,6 @@ public class PipeTile : Tile
     private const int SIDE_TOP = 2;
     private const int SIDE_RIGHT = 3;
 
-    // array of all pipe sprites
-    public Sprite[] PipeSprites;
-
     [Serializable]
     public struct DrainAnim
     {
@@ -22,8 +19,17 @@ public class PipeTile : Tile
         public Sprite[] AnimSprites;
     }
 
+    // array of all pipe sprites
+    public Sprite[] PipeSprites;
+    // Holds drain animation sprites for each pipe type
     public DrainAnim[] DrainAnimations;
+    
+    // Holds the dictionary representation of DrainAnimations
     private Dictionary<Enums.PipeTileSprite, Sprite[]> m_drainSprites = new Dictionary<Enums.PipeTileSprite, Sprite[]>();
+    private ITilemap m_tileMap;
+    private Vector3Int m_tilePos;
+    private TileAnimationData m_animData;
+    private float m_animSpeed = 0;
 
     public override bool StartUp(Vector3Int position, ITilemap tilemap, GameObject go)
     {
@@ -31,7 +37,6 @@ public class PipeTile : Tile
             // Populate dictionary for efficient lookups
             foreach (DrainAnim anim in DrainAnimations)
                 m_drainSprites.Add(anim.PipeSpriteType, anim.AnimSprites);
-
         return base.StartUp(position, tilemap, go);
     }
 
@@ -104,17 +109,28 @@ public class PipeTile : Tile
         if (m_drainSprites[tileType].Length > 0)
         {
             tileAnimationData.animatedSprites = m_drainSprites[tileType];
-            tileAnimationData.animationSpeed = 0f;
+            tileAnimationData.animationSpeed = m_animSpeed;
             tileAnimationData.animationStartTime = 0;
+            m_tilePos = location;
+            m_tileMap = tileMap;
+            m_animData = tileAnimationData;
             return true;
         }
         return false;
     }
 
+
+    public void Drain()
+    {
+        m_animSpeed = 16f;
+        GetTileAnimationData(m_tilePos, m_tileMap, ref m_animData);
+    }
+
+
     private Enums.PipeTileSprite GetTileType(TileData data)
     {
-        Enums.PipeTileSprite result = Enums.PipeTileSprite.Horizontal;
-        Debug.Log(data.sprite.name);
+        Enums.PipeTileSprite result = Enums.PipeTileSprite.CapTop;
+
         switch (data.sprite.name.ToLower())
         {
             case "pipe_corner_bottom_left":
@@ -275,7 +291,10 @@ public class PipeTile : Tile
     /// <param name="position">the position to check</param>
     private bool HasPipeTile(ITilemap tilemap, Vector3Int position)
     {
-        return tilemap.GetTile(position) == this;
+        if (tilemap != null)
+            return tilemap.GetTile(position) == this;
+        else
+            return false;
     }
 
 #if UNITY_EDITOR
