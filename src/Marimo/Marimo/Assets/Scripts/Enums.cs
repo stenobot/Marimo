@@ -56,4 +56,26 @@ public class Enums
         Robot,
         Muckle
     }
+
+	/// <summary>
+	/// Pipe tile sprites
+	/// </summary>
+	public enum PipeTileSprite
+	{
+		CornerBottomLeft,
+		CornerBottomRight,
+		CornerTopLeft,
+		CornerTopRight,
+		Horizontal,
+		OpenBottom,
+		OpenLeft,
+		OpenRight,
+		OpenTop,
+		CapBottom,
+		CapLeft,
+		CapRight,
+		CapTop,
+		Vertical,
+		OpenAll
+	}
 }
