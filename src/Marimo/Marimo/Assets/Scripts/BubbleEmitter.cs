@@ -28,7 +28,7 @@ public class BubbleEmitter : MonoBehaviour {
         // Randomize the spawn position a little so we don't get straight lines of bubbles
         Vector2 pos = (Vector2)transform.position + new Vector2(Random.Range(-.2f, 0.2f), Random.Range(-.2f, 0.2f));
         // Spawn a bubble. Parent is intentionally null.
-        GameObject bubble = Instantiate<GameObject>(BubblePrefabs[Random.Range(0, BubblePrefabs.Length)], pos, Quaternion.identity, null);
+        Instantiate<GameObject>(BubblePrefabs[Random.Range(0, BubblePrefabs.Length)], pos, Quaternion.identity, null);
 
         if(Loop)
             Invoke("Emit", Random.Range(MinLoopDelay, MaxLoopDelay));

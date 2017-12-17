@@ -65,8 +65,8 @@ public class WaterFlow : MonoBehaviour
                 Debug.DrawRay(flowPos, Vector2.down, Color.yellow, .1f);
                 flow.Position += Vector2.down * MoveScale;
                 flow.LastDirection = Vector2.down;
-                Tile t = (Tile)PipeMap.GetTile(new Vector3Int(Mathf.CeilToInt(flow.Position.x), Mathf.CeilToInt(flow.Position.y), 0));
-                
+                PipeTile t = (PipeTile)PipeMap.GetTile(new Vector3Int(Mathf.FloorToInt(flow.Position.x), Mathf.FloorToInt(flow.Position.y), 0));
+                Debug.Log(t.name);
                 hasFlowed = true;
                 if (flow.Object != null)
                     flow.Object.transform.position = flow.Position;
