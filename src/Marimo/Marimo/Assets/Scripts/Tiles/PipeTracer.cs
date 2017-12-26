@@ -8,8 +8,45 @@ public class PipeTracer : MonoBehaviour
     public GameObject PipePrefab;
     public Sprite[] PipeFullSprites;
 
+    private string[] m_pipeAnimationStates = {
+        "pipe_corner_bottom_left_drain",
+        "pipe_corner_bottom_right_drain",
+        "pipe_corner_top_left_drain",
+        "pipe_corner_top_right_drain",
+        "pipe_horizontal_drain",
+        "pipe_open_bottom_drain",
+        "pipe_open_left_drain",
+        "pipe_open_right_drain",
+        "pipe_open_top_drain",
+        "",
+        "",
+        "",
+        "",
+        "pipe_vertical_drain",
+        "pipe_water_drain"
+    };
     private Tilemap m_map;
     private List<GameObject> m_pipes;
+
+    private enum PipeType
+    {
+        None = -1,
+        CornerBottomLeft = 0,
+        CornerBottomRight = 1,
+        CornerTopLeft = 2,
+        CornerTopRight = 3,
+        Horizontal = 4,
+        OpenBottom = 5,
+        OpenLeft = 6,
+        OpenRight = 7,
+        OpenTop = 8,
+        VentBottom = 9,
+        VentLeft = 10,
+        VentRight = 11,
+        VentTop = 12,
+        Vertical = 13,
+        Water = 14
+    }
 
     // Use this for initialization
     void Start()
@@ -17,7 +54,7 @@ public class PipeTracer : MonoBehaviour
         m_map = GetComponent<Tilemap>();
         m_pipes = new List<GameObject>();
         TracePipes();
-        SetSprites();
+        SetupComponents();
     }
 
     private void TracePipes()
@@ -34,18 +71,21 @@ public class PipeTracer : MonoBehaviour
         }
     }
 
-    private void SetSprites()
+    private void SetupComponents()
     {
         foreach (GameObject g in m_pipes)
         {
-            SpriteRenderer r = g.GetComponent<SpriteRenderer>();
-            r.sprite = GetSprite(g);
+            PipeType type = GetPipeType(g);
+            g.GetComponent<SpriteRenderer>().sprite = type == PipeType.None ? null : PipeFullSprites[(int)type];
+            if (type == PipeType.None)
+                continue;
+            g.GetComponent<Animator>().Play(m_pipeAnimationStates[(int)type]);
+            g.GetComponent<Animator>().SetFloat("AnimSpeed", 1.0f);
         }
     }
 
-    private Sprite GetSprite(GameObject g)
+    private PipeType GetPipeType(GameObject g)
     {
-        Sprite sprite = null;
         Vector2 pos = g.transform.position;
 
         bool pipeUp = m_map.GetTile(m_map.WorldToCell(pos + (Vector2.up * 2))) != null;
@@ -53,31 +93,21 @@ public class PipeTracer : MonoBehaviour
         bool pipeLeft = m_map.GetTile(m_map.WorldToCell(pos + (Vector2.left * 2))) != null;
         bool pipeRight = m_map.GetTile(m_map.WorldToCell(pos + (Vector2.right * 2))) != null;
 
-        // corner bottom left
-        sprite = (pipeUp && !pipeDown) && (!pipeLeft && pipeRight) ? PipeFullSprites[0] : sprite;
-        // corner bottom right
-        sprite = (pipeUp && !pipeDown) && (pipeLeft && !pipeRight) ? PipeFullSprites[1] : sprite;
-        // corner top left
-        sprite = (!pipeUp && pipeDown) && (!pipeLeft && pipeRight) ? PipeFullSprites[2] : sprite;
-        // corner top right
-        sprite = (!pipeUp && pipeDown) && (pipeLeft && !pipeRight) ? PipeFullSprites[3] : sprite;
-        // horizontal sprite
-        sprite = (!pipeUp && !pipeDown) && (pipeLeft || pipeRight) ? PipeFullSprites[4] : sprite;
-        // vertical sprite
-        sprite = (pipeUp && pipeDown) && (!pipeLeft && !pipeRight) ? PipeFullSprites[13] : sprite;
-        // water sprite
-        sprite = (pipeUp && pipeDown) && (pipeLeft || pipeRight) ? PipeFullSprites[14] : sprite;
-        sprite = (pipeUp || pipeDown) && (pipeLeft && pipeRight) ? PipeFullSprites[14] : sprite;
+        if ((pipeUp && !pipeDown) && (!pipeLeft && pipeRight))
+            return PipeType.CornerBottomLeft;
+        if ((pipeUp && !pipeDown) && (pipeLeft && !pipeRight))
+            return PipeType.CornerBottomRight;
+        if ((!pipeUp && pipeDown) && (!pipeLeft && pipeRight))
+            return PipeType.CornerTopLeft;
+        if ((!pipeUp && pipeDown) && (pipeLeft && !pipeRight))
+            return PipeType.CornerTopRight;
+        if ((!pipeUp && !pipeDown) && (pipeLeft || pipeRight))
+            return PipeType.Horizontal;
+        if ((pipeUp && pipeDown) && (!pipeLeft && !pipeRight))
+            return PipeType.Vertical;
+        if (((pipeUp && pipeDown) && (pipeLeft || pipeRight)) || ((pipeUp || pipeDown) && (pipeLeft && pipeRight)))
+            return PipeType.Water;
 
-        // Vents are special, they're already ok on the tile grid and should never drain
-        // vent bottom sprite
-        sprite = pipeUp && !pipeDown && !pipeLeft && !pipeRight ? null : sprite;
-        // vent left sprite
-        sprite = pipeRight && !pipeUp && !pipeDown && !pipeLeft ? null : sprite;
-        // vent right sprite
-        sprite = pipeLeft && !pipeUp && !pipeDown && !pipeRight ? null : sprite;
-        // vent top sprite
-        sprite = pipeDown && !pipeUp && !pipeLeft && !pipeRight ? null : sprite;
-        return sprite;
+        return PipeType.None;
     }
 }
