@@ -114,7 +114,7 @@ public class PipeTracer : MonoBehaviour
             return Enums.PipeType.CornerTopLeft;
         if ((!pipeUp && pipeDown) && (pipeLeft && !pipeRight))
             return Enums.PipeType.CornerTopRight;
-        if ((!pipeUp && !pipeDown) && (pipeLeft || pipeRight))
+        if ((!pipeUp && !pipeDown) && (pipeLeft && pipeRight))
             return Enums.PipeType.Horizontal;
         if ((pipeUp && pipeDown) && (!pipeLeft && !pipeRight))
             return Enums.PipeType.Vertical;
