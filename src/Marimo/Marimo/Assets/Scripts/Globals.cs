@@ -26,6 +26,7 @@ public class Globals
 	public const string ANIMSTATE_DISPENSOR_ON = "dispensor_on";
 	public const string ANIMSTATE_MUCKLE_CHARGE = "charge";
 	public const string ANIMSTATE_MUCKLE_CHARGE_HOLD = "charge_hold";
+	public const string ANIMSTATE_MUCKLE_GROW = "grow";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
