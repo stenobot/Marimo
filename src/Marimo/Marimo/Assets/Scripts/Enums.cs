@@ -78,4 +78,24 @@ public class Enums
 		Vertical,
 		OpenAll
 	}
+
+    public enum PipeType
+    {
+        None = -1,
+        CornerBottomLeft = 0,
+        CornerBottomRight = 1,
+        CornerTopLeft = 2,
+        CornerTopRight = 3,
+        Horizontal = 4,
+        OpenBottom = 5,
+        OpenLeft = 6,
+        OpenRight = 7,
+        OpenTop = 8,
+        VentBottom = 9,
+        VentLeft = 10,
+        VentRight = 11,
+        VentTop = 12,
+        Vertical = 13,
+        Water = 14
+    }
 }
