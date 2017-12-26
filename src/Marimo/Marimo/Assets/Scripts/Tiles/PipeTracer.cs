@@ -7,7 +7,6 @@ using UnityEngine.Tilemaps;
 public class PipeTracer : MonoBehaviour
 {
     public GameObject PipePrefab;
-    public Sprite[] PipeFullSprites;
     public GameObject[] ColliderPrefabs;
 
     private static string[] s_pipeAnimationStates = {
@@ -20,10 +19,10 @@ public class PipeTracer : MonoBehaviour
         "pipe_open_left_drain",
         "pipe_open_right_drain",
         "pipe_open_top_drain",
-        "",
-        "",
-        "",
-        "",
+        "pipe_vent_bottom_drain",
+        "pipe_vent_left_drain",
+        "pipe_vent_right_drain",
+        "pipe_vent_top_drain",
         "pipe_vertical_drain",
         "pipe_water_drain"
     };
@@ -69,9 +68,6 @@ public class PipeTracer : MonoBehaviour
             // Get the pipe type
             Enums.PipeType pipeType = GetPipeType(g);
 
-            // Set sprite (null if bad pipe type)
-            g.GetComponent<SpriteRenderer>().sprite = pipeType == Enums.PipeType.None ? null : PipeFullSprites[(int)pipeType];
-
             // Bail if pipe type is none
             if (pipeType == Enums.PipeType.None)
                 continue;
@@ -85,7 +81,7 @@ public class PipeTracer : MonoBehaviour
             node.NodeRight = GetNodeAt((Vector2)g.transform.position + (Vector2.right * 2));
 
             // Set animation state
-            g.GetComponent<Animator>().Play(s_pipeAnimationStates[(int)pipeType]);
+            g.GetComponent<Animator>().Play(s_pipeAnimationStates[(int)pipeType], 0, 0);
         }
     }
 
