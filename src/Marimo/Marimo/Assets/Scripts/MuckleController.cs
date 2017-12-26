@@ -43,6 +43,8 @@ public class MuckleController : MonoBehaviour
     private AudioSource m_audio;
     private Rigidbody2D m_rigidBody;
     private GameManager m_gameManager;
+	private ChargeController m_chargeController;
+	private GrowController m_growController;
 
     #endregion
 
@@ -52,8 +54,6 @@ public class MuckleController : MonoBehaviour
     private bool m_canControl = false;
     // Tracks if the player's boost mode is active
     private bool m_boostMode = false;
-    // Tracks if the player is currently inflated
-    private bool m_isInflated = false;
     // Tracks the current maximum boost speed to apply (to permit deceleration)
     private float m_maxBoostSpeed;
 
@@ -68,6 +68,8 @@ public class MuckleController : MonoBehaviour
         m_anim = GetComponentInChildren<Animator>();
         m_audio = GetComponentInChildren<AudioSource>();
         m_rigidBody = GetComponent<Rigidbody2D>();
+		m_chargeController = GetComponentInChildren<ChargeController>();
+		m_growController = GetComponentInChildren<GrowController>();
         m_maxBoostSpeed = MaxBoostSpeed;
     }
 
@@ -128,16 +130,32 @@ public class MuckleController : MonoBehaviour
     /// </summary>
     private void HandleInput()
     {
-        // Handle inflation
-        if (Input.GetButtonDown(Globals.INPUT_BUTTON_FIRE1))
-        {
-            Inflate();
-            return;
-        }
-        if (Input.GetButtonUp(Globals.INPUT_BUTTON_FIRE1))
-            Deflate();
-        else if (m_isInflated)
-            return;
+        // Handle charge up and charge down
+		if (Input.GetButton(Globals.INPUT_BUTTON_FIRE1)) 
+		{
+			m_chargeController.ChargeUp();
+			return;
+		} else if (m_chargeController.CurrentLevel > 0) 
+		{
+			m_chargeController.ChargeDown();
+			return;
+		}
+
+		// always force charge down when button is released
+		if (Input.GetButtonUp(Globals.INPUT_BUTTON_FIRE1)) 
+		{
+			if (m_chargeController.ForceChargeDown)
+				m_chargeController.ForceChargeDown = false;
+		}
+
+		// handle grow and shrink
+		if (Input.GetButton(Globals.INPUT_BUTTON_FIRE2)) 
+		{
+			m_growController.Grow(m_anim);
+		} else
+		{
+			m_growController.Shrink(m_anim);
+		}
 
         // Capture the X and Y axis input values (Input.GetAxis returns a float between -1 and 1)
         float xAxisInput = Input.GetAxis(Globals.INPUT_AXIS_HORIZONTAL);
@@ -175,23 +193,6 @@ public class MuckleController : MonoBehaviour
             MaxSpeed + ((m_boostMode) ? m_maxBoostSpeed : 0));
 
         m_rigidBody.velocity = MathHelper.Clamp(m_rigidBody.velocity, -trueMaxSpeed, trueMaxSpeed);
-    }
-
-    private void Deflate()
-    {
-        Debug.Log("deflated");
-        m_rigidBody.isKinematic = false;
-        transform.localScale = Vector2.one;
-        m_isInflated = false;
-    }
-
-    private void Inflate()
-    {
-        Debug.Log("inflated");
-        m_rigidBody.isKinematic = true;
-        m_rigidBody.velocity = Vector2.zero;
-        transform.localScale.Scale(new Vector2(1.5f, 1.5f));
-        m_isInflated = true;
     }
 
     /// <summary>

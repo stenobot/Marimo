@@ -42,7 +42,7 @@ public class RobotController : MonoBehaviour
 
     // Animators
     public Animator Animator_Treads;
-    public Animator Animator_Body;
+	public Animator Animator_Body;
     public Animator Animator_ThoughtBubble;
     public Animator Animator_ToolIcon;
     public Animator Animator_InteractionIcon;

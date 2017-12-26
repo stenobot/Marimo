@@ -24,9 +24,13 @@ public class Globals
     public const string ANIMSTATE_HINT_TOOL_WRENCH = "wrench";
     public const string ANIMSTATE_HINT_TOOL_UPDOWNARROWS = "updownarrows";
 	public const string ANIMSTATE_DISPENSOR_ON = "dispensor_on";
+	public const string ANIMSTATE_MUCKLE_CHARGE = "charge";
+	public const string ANIMSTATE_MUCKLE_CHARGE_HOLD = "charge_hold";
+	public const string ANIMSTATE_MUCKLE_GROW = "grow";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
+	public const string ANIM_PARAM_NORM_TIME = "AnimNormTime";
 
     // Axes for input
     public const string INPUT_AXIS_HORIZONTAL = "Horizontal";
