@@ -8,6 +8,9 @@ public class PipeTracer : MonoBehaviour
 {
     public GameObject PipePrefab;
     public GameObject[] ColliderPrefabs;
+    private List<EdgeCollider2D> m_edgeColliders;
+    private EdgeCollider2D m_topCollider;
+    private EdgeCollider2D m_bottomCollider;
 
     private static string[] s_pipeAnimationStates = {
         "pipe_corner_bottom_left_drain",
@@ -37,11 +40,17 @@ public class PipeTracer : MonoBehaviour
         m_map = GetComponent<Tilemap>();
         m_pipes = new List<GameObject>();
         m_pipeNodes = new Dictionary<Vector2, PipeNode>();
+        m_edgeColliders = new List<EdgeCollider2D>();
 
         TracePipes();
         SetupComponents();
     }
 
+
+    /// <summary>
+    /// Finds tiles of type <see cref="PipeTile"/> on the attached <see cref="Tilemap"/>
+    /// Instantiates the <see cref="PipePrefab"/> with a <see cref="PipeNode"/> component at their world position
+    /// </summary>
     private void TracePipes()
     {
         for (int x = m_map.cellBounds.xMin; x < m_map.cellBounds.xMax; x++)
@@ -61,16 +70,15 @@ public class PipeTracer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up components on the pipe gameobjects after they have all been created (so node connections can be enumerated)
+    /// </summary>
     private void SetupComponents()
     {
         foreach (GameObject g in m_pipes)
         {
             // Get the pipe type
             Enums.PipeType pipeType = GetPipeType(g);
-
-            // Bail if pipe type is none
-            if (pipeType == Enums.PipeType.None)
-                continue;
 
             // Setup node
             PipeNode node = g.GetComponent<PipeNode>();
@@ -80,8 +88,20 @@ public class PipeTracer : MonoBehaviour
             node.NodeLeft = GetNodeAt((Vector2)g.transform.position + (Vector2.left * 2));
             node.NodeRight = GetNodeAt((Vector2)g.transform.position + (Vector2.right * 2));
 
-            // Set animation state
-            g.GetComponent<Animator>().Play(s_pipeAnimationStates[(int)pipeType], 0, 0);
+            if (pipeType != Enums.PipeType.None)
+            {
+                // Set the animation state
+                g.GetComponent<Animator>().Play(s_pipeAnimationStates[(int)pipeType], 0, 0);
+
+                GameObject tempObj = Instantiate(ColliderPrefabs[(int)pipeType]);
+                // Filthy non-composite colliders. I am a terrible human :)
+                foreach (EdgeCollider2D edge in tempObj.GetComponents<EdgeCollider2D>())
+                {
+                    EdgeCollider2D newEdge = g.AddComponent<EdgeCollider2D>();
+                    newEdge.points = edge.points;
+                }
+                Destroy(tempObj);
+            }
         }
     }
 
@@ -110,6 +130,22 @@ public class PipeTracer : MonoBehaviour
             return Enums.PipeType.CornerTopLeft;
         if ((!pipeUp && pipeDown) && (pipeLeft && !pipeRight))
             return Enums.PipeType.CornerTopRight;
+        if (pipeLeft && pipeRight && !pipeUp && pipeDown)
+            return Enums.PipeType.OpenTop;
+        if (pipeLeft && pipeRight && pipeUp && !pipeDown)
+            return Enums.PipeType.OpenBottom;
+        if ((pipeUp && pipeDown && pipeLeft && !pipeRight))
+            return Enums.PipeType.OpenRight;
+        if ((pipeUp && pipeDown && !pipeLeft && pipeRight))
+            return Enums.PipeType.OpenLeft;
+        if (pipeUp && !pipeDown && !pipeLeft && !pipeRight)
+            return Enums.PipeType.VentBottom;
+        if (!pipeUp && pipeDown && !pipeLeft && !pipeRight)
+            return Enums.PipeType.VentTop;
+        if (!pipeUp && !pipeDown && !pipeLeft && pipeRight)
+            return Enums.PipeType.VentLeft;
+        if (!pipeUp && !pipeDown && pipeLeft && !pipeRight)
+            return Enums.PipeType.VentRight;
         if ((!pipeUp && !pipeDown) && (pipeLeft && pipeRight))
             return Enums.PipeType.Horizontal;
         if ((pipeUp && pipeDown) && (!pipeLeft && !pipeRight))

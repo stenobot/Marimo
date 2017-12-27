@@ -42,7 +42,7 @@ public class RobotController : MonoBehaviour
 
     // Animators
     public Animator Animator_Treads;
-	public Animator Animator_Body;
+    public Animator Animator_Body;
     public Animator Animator_ThoughtBubble;
     public Animator Animator_ToolIcon;
     public Animator Animator_InteractionIcon;
@@ -348,7 +348,8 @@ public class RobotController : MonoBehaviour
                 m_isMoving = true;
                 // Play the move audio
                 m_audio.clip = Audio_Move;
-                m_audio.Play();
+                if (m_audio.isActiveAndEnabled)
+                    m_audio.Play();
                 // Start bump animation
                 if (m_isGrounded)
                     Invoke("Bump", UnityEngine.Random.Range(MinBumpTime, MaxBumpTime));
