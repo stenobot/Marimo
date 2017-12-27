@@ -133,7 +133,7 @@ public class MuckleController : MonoBehaviour
         // Handle charge up and charge down
 		if (Input.GetButton(Globals.INPUT_BUTTON_FIRE1)) 
 		{
-			m_chargeController.ChargeUp();
+            m_chargeController.ChargeUp(m_anim, m_growController.CurrentGrowthLevel >= 1);
 			return;
 		} else if (m_chargeController.CurrentLevel > 0) 
 		{
@@ -151,7 +151,7 @@ public class MuckleController : MonoBehaviour
 		// handle grow and shrink
 		if (Input.GetButton(Globals.INPUT_BUTTON_FIRE2)) 
 		{
-			m_growController.Grow(m_anim);
+            m_growController.Grow(m_anim);
 		} else
 		{
 			m_growController.Shrink(m_anim);

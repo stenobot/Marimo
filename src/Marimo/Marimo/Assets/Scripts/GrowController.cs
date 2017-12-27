@@ -12,7 +12,7 @@ public class GrowController : MonoBehaviour
     /// <summary>
     /// Muckle's current level of growth, where 0 is normal size and 1 is largest
     /// </summary>
-    private float m_currentGrowthLevel;
+    public float CurrentGrowthLevel;
 
     /// <summary>
     /// Inflate Muckle.
@@ -20,14 +20,14 @@ public class GrowController : MonoBehaviour
     /// <param name="anim">Muckle's primary Animator</param>
     public void Grow(Animator anim)
     {
-        if (m_currentGrowthLevel < 0.05f)
+        if (CurrentGrowthLevel < 0.05f)
         {
             anim.Play(Globals.ANIMSTATE_MUCKLE_GROW);
         }
 
-        if (m_currentGrowthLevel > 0.95f)
+        if (CurrentGrowthLevel > 0.95f)
         {
-            m_currentGrowthLevel = 1;
+            CurrentGrowthLevel = 1;
 
             // Drain the pipes
             Vector2 pos = new Vector2(Mathf.CeilToInt(transform.position.x), Mathf.CeilToInt(transform.position.y));
@@ -38,10 +38,10 @@ public class GrowController : MonoBehaviour
         }
         else
         {
-            m_currentGrowthLevel += (Time.deltaTime * 3);
+            CurrentGrowthLevel += (Time.deltaTime * 3);
         }
 
-        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
+        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, CurrentGrowthLevel);
     }
 
     /// <summary>
@@ -50,20 +50,21 @@ public class GrowController : MonoBehaviour
     /// <param name="anim">Muckle's primary Animator</param>
     public void Shrink(Animator anim)
     {
-        if (m_currentGrowthLevel <= 0)
+        if (CurrentGrowthLevel <= 0)
         {
             anim.Play(Globals.ANIMSTATE_IDLE);
             return;
         }
-        else if (m_currentGrowthLevel > 0 && m_currentGrowthLevel < 0.05f)
+        else if (CurrentGrowthLevel > 0 && CurrentGrowthLevel < 0.05f)
         {
-            m_currentGrowthLevel = 0;
+            CurrentGrowthLevel = 0;
         }
         else
         {
-            m_currentGrowthLevel -= (Time.deltaTime * 3);
+            anim.Play(Globals.ANIMSTATE_MUCKLE_GROW);
+            CurrentGrowthLevel -= (Time.deltaTime * 3);
         }
 
-        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
+        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, CurrentGrowthLevel);
     }
 }
