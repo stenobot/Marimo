@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -8,9 +6,7 @@ public class PipeTracer : MonoBehaviour
 {
     public GameObject PipePrefab;
     public GameObject[] ColliderPrefabs;
-    private List<EdgeCollider2D> m_edgeColliders;
-    private EdgeCollider2D m_topCollider;
-    private EdgeCollider2D m_bottomCollider;
+    public Dictionary<Vector2, PipeNode> PipeNodes;
 
     private static string[] s_pipeAnimationStates = {
         "pipe_corner_bottom_left_drain",
@@ -32,15 +28,13 @@ public class PipeTracer : MonoBehaviour
 
     private Tilemap m_map;
     private List<GameObject> m_pipes;
-    private Dictionary<Vector2, PipeNode> m_pipeNodes;
 
     // Use this for initialization
     void Start()
     {
         m_map = GetComponent<Tilemap>();
         m_pipes = new List<GameObject>();
-        m_pipeNodes = new Dictionary<Vector2, PipeNode>();
-        m_edgeColliders = new List<EdgeCollider2D>();
+        PipeNodes = new Dictionary<Vector2, PipeNode>();
 
         TracePipes();
         SetupComponents();
@@ -49,7 +43,7 @@ public class PipeTracer : MonoBehaviour
 
     /// <summary>
     /// Finds tiles of type <see cref="PipeTile"/> on the attached <see cref="Tilemap"/>
-    /// Instantiates the <see cref="PipePrefab"/> with a <see cref="PipeNode"/> component at their world position
+    /// Instantiates the <see cref="PipePrefab"/> at their world position
     /// </summary>
     private void TracePipes()
     {
@@ -62,9 +56,9 @@ public class PipeTracer : MonoBehaviour
                 if (pipe != null)
                 {
                     GameObject g = Instantiate(PipePrefab, m_map.CellToWorld(pos) + new Vector3(1, 1, 0), Quaternion.identity, transform);
-                    PipeNode node = g.AddComponent<PipeNode>();
+                    PipeNode node = g.GetComponent<PipeNode>();
                     m_pipes.Add(g);
-                    m_pipeNodes.Add(g.transform.position, node);
+                    PipeNodes.Add(g.transform.position, node);
                 }
             }
         }
@@ -107,8 +101,8 @@ public class PipeTracer : MonoBehaviour
 
     private PipeNode GetNodeAt(Vector2 vector2)
     {
-        if (m_pipeNodes.ContainsKey(vector2))
-            return m_pipeNodes[vector2];
+        if (PipeNodes.ContainsKey(vector2))
+            return PipeNodes[vector2];
 
         return null;
     }
