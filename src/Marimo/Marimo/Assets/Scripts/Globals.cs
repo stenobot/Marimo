@@ -27,6 +27,8 @@ public class Globals
 	public const string ANIMSTATE_MUCKLE_CHARGE = "charge";
 	public const string ANIMSTATE_MUCKLE_CHARGE_HOLD = "charge_hold";
 	public const string ANIMSTATE_MUCKLE_GROW = "grow";
+	public const string ANIMSTATE_MUCKLE_FULL_CHARGE = "full_charge";
+    public const string ANIMSTATE_MUCKLE_GROW_FULL_CHARGE = "grow_full_charge";
 
     // Animation parameters
     public const string ANIM_PARAM_SPEED = "AnimSpeed";
