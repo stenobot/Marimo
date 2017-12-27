@@ -53,8 +53,9 @@ public class ChargeController : MonoBehaviour
 	// Private member variables
 	private bool m_forceChargeDown;
 	private float m_animSpeedInterval;
-	private SpriteRenderer m_spriteRenderer;
 	private float m_currentHoldLevel;
+	private SpriteRenderer m_spriteRenderer;
+	private CircleCollider2D m_chargeTrigger;
 
 	// initialization
 	private void Start() 
@@ -64,7 +65,12 @@ public class ChargeController : MonoBehaviour
 		m_currentHoldLevel = MaxHoldLevel;
 		CurrentLevel = 0;
 		ChargeBar.value = 0;
-		m_spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+		m_spriteRenderer = GetComponent<SpriteRenderer>();
+
+		// initialize the trigger area collider
+		m_chargeTrigger = GetComponent<CircleCollider2D>();
+		m_chargeTrigger.radius = 1;
+		m_chargeTrigger.enabled = false;
 
 		// set the charge progress bar level
 		ChargeBar.maxValue = MaxLevel;
@@ -79,16 +85,19 @@ public class ChargeController : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Charge up Muckle's ability.
-	/// </summary>
-	public void ChargeUp()
+    /// Charge up Muckle's ability.
+    /// </summary>
+    /// <param name="anim">Muckle's primary animator</param>
+    /// <param name="isFullGrown">If set to <c>true</c> Muckle is full grown.</param>
+    public void ChargeUp(Animator anim, bool isFullGrown)
 	{		
 		if (!IsCharging) 
 		{
-			// we're charging, so enab sprites and progress bar
+			// we're charging, so enable sprites, trigger area, and progress bar
 			m_spriteRenderer.enabled = true;
-			IsCharging = true;
+			m_chargeTrigger.enabled = true;
 			ChargeBar.gameObject.SetActive(true);
+			IsCharging = true;
 		}
 
 		// mechanism for forcing charge down regardless of button press state
@@ -111,6 +120,13 @@ public class ChargeController : MonoBehaviour
 		// mechanism for fully charged
 		if (CurrentLevel == 1) 
 		{
+            // play muckle's full charge animation,
+            // which one depends on whether he's full grown or not
+            if (isFullGrown)
+                anim.Play (Globals.ANIMSTATE_MUCKLE_GROW_FULL_CHARGE);
+            else
+			    anim.Play(Globals.ANIMSTATE_MUCKLE_FULL_CHARGE);
+            
 			// animation for holding charge
 			UpdateHoldAnimSpeed();
 			Animator_Charge.Play(Globals.ANIMSTATE_MUCKLE_CHARGE_HOLD);
@@ -136,7 +152,10 @@ public class ChargeController : MonoBehaviour
 			Animator_Charge.SetFloat(Globals.ANIM_PARAM_NORM_TIME, CurrentLevel);
 		}
 
-		// always update the charge progress bar
+		// update the size of the charge hit area
+		m_chargeTrigger.radius = CurrentLevel * 6;
+
+		// update the charge progress bar
 		ChargeBar.value = CurrentLevel;
 
 		//Debug.Log ("charging up: " + CurrentLevel);
@@ -147,14 +166,16 @@ public class ChargeController : MonoBehaviour
 	/// </summary>
 	public void ChargeDown()
 	{
-		if (CurrentLevel < 0.05f) 
+		if (IsCharging && CurrentLevel < 0.05f) 
 		{
 			// snap level to zero and reset everything
 			CurrentLevel = 0;
 			m_spriteRenderer.enabled = false;
-			IsCharging = false;
+			m_chargeTrigger.radius = 1;
+			m_chargeTrigger.enabled = false;
 			ChargeBar.gameObject.SetActive(false);
 			m_currentHoldLevel = MaxHoldLevel;
+			IsCharging = false;
 		} else 
 		{
 			// decrement current charge level  
@@ -171,7 +192,10 @@ public class ChargeController : MonoBehaviour
 			Animator_Charge.SetFloat(Globals.ANIM_PARAM_NORM_TIME, CurrentLevel);
 		}
 
-		// always update charge progress bar
+		// update the size of the charge hit area
+		m_chargeTrigger.radius = CurrentLevel * 6;
+
+		// update charge progress bar
 		ChargeBar.value = CurrentLevel;
 
 		//Debug.Log ("charging down: " + CurrentLevel);
