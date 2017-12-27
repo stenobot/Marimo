@@ -6,7 +6,6 @@ public class PipeTracer : MonoBehaviour
 {
     public GameObject PipePrefab;
     public GameObject[] ColliderPrefabs;
-    public Dictionary<Vector2, PipeNode> PipeNodes;
 
     private static string[] s_pipeAnimationStates = {
         "pipe_corner_bottom_left_drain",
@@ -26,18 +25,28 @@ public class PipeTracer : MonoBehaviour
         "pipe_water_drain"
     };
 
+    private static Vector3 s_tileOffset = new Vector3(1, 1, 0);
     private Tilemap m_map;
     private List<GameObject> m_pipes;
+    private Dictionary<Vector2, PipeNode> m_pipeNodes;
 
     // Use this for initialization
     void Start()
     {
         m_map = GetComponent<Tilemap>();
         m_pipes = new List<GameObject>();
-        PipeNodes = new Dictionary<Vector2, PipeNode>();
+        m_pipeNodes = new Dictionary<Vector2, PipeNode>();
 
         TracePipes();
         SetupComponents();
+    }
+
+    public PipeNode GetPipeNodeAtPosition(Vector2 pos)
+    {
+        Vector3Int cellPos = m_map.WorldToCell(pos);
+        Vector2 nodePos = m_map.CellToWorld(cellPos) + s_tileOffset;
+
+        return m_pipeNodes.ContainsKey(nodePos) ? m_pipeNodes[nodePos] : null;
     }
 
 
@@ -55,10 +64,10 @@ public class PipeTracer : MonoBehaviour
                 PipeTile pipe = m_map.GetTile(pos) as PipeTile;
                 if (pipe != null)
                 {
-                    GameObject g = Instantiate(PipePrefab, m_map.CellToWorld(pos) + new Vector3(1, 1, 0), Quaternion.identity, transform);
+                    GameObject g = Instantiate(PipePrefab, m_map.CellToWorld(pos) + s_tileOffset, Quaternion.identity, transform);
                     PipeNode node = g.GetComponent<PipeNode>();
                     m_pipes.Add(g);
-                    PipeNodes.Add(g.transform.position, node);
+                    m_pipeNodes.Add(g.transform.position, node);
                 }
             }
         }
@@ -77,10 +86,10 @@ public class PipeTracer : MonoBehaviour
             // Setup node
             PipeNode node = g.GetComponent<PipeNode>();
             node.PipeType = pipeType;
-            node.NodeTop = GetNodeAt((Vector2)g.transform.position + (Vector2.up * 2));
-            node.NodeBottom = GetNodeAt((Vector2)g.transform.position + (Vector2.down * 2));
-            node.NodeLeft = GetNodeAt((Vector2)g.transform.position + (Vector2.left * 2));
-            node.NodeRight = GetNodeAt((Vector2)g.transform.position + (Vector2.right * 2));
+            node.NodeTop = GetPipeNodeAtPosition((Vector2)g.transform.position + (Vector2.up * 2));
+            node.NodeBottom = GetPipeNodeAtPosition((Vector2)g.transform.position + (Vector2.down * 2));
+            node.NodeLeft = GetPipeNodeAtPosition((Vector2)g.transform.position + (Vector2.left * 2));
+            node.NodeRight = GetPipeNodeAtPosition((Vector2)g.transform.position + (Vector2.right * 2));
 
             if (pipeType != Enums.PipeType.None)
             {
@@ -99,13 +108,6 @@ public class PipeTracer : MonoBehaviour
         }
     }
 
-    private PipeNode GetNodeAt(Vector2 vector2)
-    {
-        if (PipeNodes.ContainsKey(vector2))
-            return PipeNodes[vector2];
-
-        return null;
-    }
 
     private Enums.PipeType GetPipeType(GameObject g)
     {

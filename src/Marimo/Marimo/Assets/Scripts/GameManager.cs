@@ -67,8 +67,8 @@ public class GameManager : MonoBehaviour
             GameObject.FindGameObjectWithTag(Globals.TAG_MUCKLE).GetComponent<MuckleController>() :
             null;
         ViewedHints = new HashSet<string>();
-        // Default to selecting the robot as the playable character
-        SelectRobot();
+        // Default to selecting Muckle as the playable character
+        SelectMuckle();
         // Set programmatic sorting layers to meshes
         SetMeshSortingLayers();
     }

@@ -2,55 +2,68 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GrowController : MonoBehaviour 
+public class GrowController : MonoBehaviour
 {
-	/// <summary>
-	/// Muckle's current level of growth, where 0 is normal size and 1 is largest
-	/// </summary>
-	private float m_currentGrowthLevel;
+    /// <summary>
+    /// A reference to the pipe tracer
+    /// </summary>
+    public PipeTracer PipeTracer;
 
-	/// <summary>
-	/// Inflate Muckle.
-	/// </summary>
-	/// <param name="anim">Muckle's primary Animator</param>
-	public void Grow(Animator anim)
-	{
-		if (m_currentGrowthLevel < 0.05f)
-		{
-			anim.Play(Globals.ANIMSTATE_MUCKLE_GROW);
-		}  
+    /// <summary>
+    /// Muckle's current level of growth, where 0 is normal size and 1 is largest
+    /// </summary>
+    private float m_currentGrowthLevel;
 
-		if (m_currentGrowthLevel > 0.95f) 
-		{
-			m_currentGrowthLevel = 1;
-		} else 
-		{
-			m_currentGrowthLevel += (Time.deltaTime * 3);
-		}
+    /// <summary>
+    /// Inflate Muckle.
+    /// </summary>
+    /// <param name="anim">Muckle's primary Animator</param>
+    public void Grow(Animator anim)
+    {
+        if (m_currentGrowthLevel < 0.05f)
+        {
+            anim.Play(Globals.ANIMSTATE_MUCKLE_GROW);
+        }
 
-		anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
-		// Debug.Log(m_currentGrowthLevel);
-	}
+        if (m_currentGrowthLevel > 0.95f)
+        {
+            m_currentGrowthLevel = 1;
 
-	/// <summary>
-	/// Deflate Muckle.
-	/// </summary>
-	/// <param name="anim">Muckle's primary Animator</param>
-	public void Shrink(Animator anim)
-	{
-		if (m_currentGrowthLevel <= 0)
-		{
-			anim.Play(Globals.ANIMSTATE_IDLE);
-			return;
-		} else if (m_currentGrowthLevel > 0 && m_currentGrowthLevel < 0.05f) 
-		{
-			m_currentGrowthLevel = 0;
-		} else 
-		{
-			m_currentGrowthLevel -= (Time.deltaTime * 3);
-		}
+            // Drain the pipes
+            Vector2 pos = new Vector2(Mathf.CeilToInt(transform.position.x), Mathf.CeilToInt(transform.position.y));
+            Vector2 direction = transform.lossyScale.x > 0 ? Vector2.right : Vector2.left;
+            PipeNode pipe = PipeTracer.GetPipeNodeAtPosition(pos);
+            if (pipe != null)
+                pipe.Drain(direction);
+        }
+        else
+        {
+            m_currentGrowthLevel += (Time.deltaTime * 3);
+        }
 
-		anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
-		// Debug.Log(m_currentGrowthLevel);
-	}
+        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
+    }
+
+    /// <summary>
+    /// Deflate Muckle.
+    /// </summary>
+    /// <param name="anim">Muckle's primary Animator</param>
+    public void Shrink(Animator anim)
+    {
+        if (m_currentGrowthLevel <= 0)
+        {
+            anim.Play(Globals.ANIMSTATE_IDLE);
+            return;
+        }
+        else if (m_currentGrowthLevel > 0 && m_currentGrowthLevel < 0.05f)
+        {
+            m_currentGrowthLevel = 0;
+        }
+        else
+        {
+            m_currentGrowthLevel -= (Time.deltaTime * 3);
+        }
+
+        anim.SetFloat(Globals.ANIM_PARAM_NORM_TIME, m_currentGrowthLevel);
+    }
 }
