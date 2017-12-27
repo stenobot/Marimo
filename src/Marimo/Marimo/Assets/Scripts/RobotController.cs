@@ -99,7 +99,7 @@ public class RobotController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (!IsDead)
+        if (!IsDead && m_canControl)
             // Process input
             HandleInput();
     }
